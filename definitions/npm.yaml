@@ -21,8 +21,9 @@ version_detection:
 commands:
   install:
     base: [install]
+    base_overrides:
+      frozen: [ci]
     flags:
-      frozen: [--ci]
       clean: []
       production: [--omit=dev]
     exit_codes:

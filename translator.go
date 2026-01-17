@@ -87,7 +87,18 @@ func (t *Translator) buildCommandChain(binary string, cmd definitions.Command, i
 
 func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, input CommandInput) ([]string, error) {
 	args := []string{binary}
-	args = append(args, cmd.Base...)
+
+	// Check for base overrides (e.g., frozen flag changes "install" to "ci" for npm)
+	baseOverrideUsed := ""
+	base := cmd.Base
+	for flagName, override := range cmd.BaseOverrides {
+		if val, ok := input.Flags[flagName]; ok && isTruthy(val) {
+			base = override
+			baseOverrideUsed = flagName
+			break
+		}
+	}
+	args = append(args, base...)
 
 	// Process args in a deterministic order
 	// First handle package, then version (for suffix handling)
@@ -150,6 +161,11 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 			continue
 		}
 
+		// Skip flag if it was used for base override
+		if name == baseOverrideUsed {
+			continue
+		}
+
 		flagDef, ok := cmd.Flags[name]
 		if !ok {
 			continue
@@ -202,4 +218,18 @@ func (t *Translator) validate(validatorName, value string) error {
 	}
 
 	return nil
+}
+
+func isTruthy(val any) bool {
+	if val == nil {
+		return false
+	}
+	switch v := val.(type) {
+	case bool:
+		return v
+	case string:
+		return v != ""
+	default:
+		return true
+	}
 }

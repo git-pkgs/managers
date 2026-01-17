@@ -43,7 +43,7 @@ func TestNpmInstallFrozen(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
-	expected := []string{"npm", "install", "--ci"}
+	expected := []string{"npm", "ci"}
 	if !reflect.DeepEqual(cmd, expected) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}

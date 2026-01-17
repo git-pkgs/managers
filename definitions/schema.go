@@ -34,12 +34,13 @@ type VersionDetection struct {
 }
 
 type Command struct {
-	Base         []string          `yaml:"base"`
-	Args         map[string]Arg    `yaml:"args,omitempty"`
-	Flags        map[string]Flag   `yaml:"flags,omitempty"`
-	DefaultFlags []string          `yaml:"default_flags,omitempty"`
-	ExitCodes    map[int]string    `yaml:"exit_codes,omitempty"`
-	Then         []Command         `yaml:"then,omitempty"` // commands to run after this one
+	Base          []string            `yaml:"base"`
+	BaseOverrides map[string][]string `yaml:"base_overrides,omitempty"` // flag name -> replacement base
+	Args          map[string]Arg      `yaml:"args,omitempty"`
+	Flags         map[string]Flag     `yaml:"flags,omitempty"`
+	DefaultFlags  []string            `yaml:"default_flags,omitempty"`
+	ExitCodes     map[int]string      `yaml:"exit_codes,omitempty"`
+	Then          []Command           `yaml:"then,omitempty"` // commands to run after this one
 }
 
 type Arg struct {
