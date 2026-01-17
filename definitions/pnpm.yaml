@@ -1,0 +1,115 @@
+name: pnpm
+ecosystem: npm
+binary: pnpm
+version: ">=8.0.0"
+status: current
+min_tested: "8.0.0"
+max_tested: "8.14.0"
+
+detection:
+  lockfiles:
+    - pnpm-lock.yaml
+  manifests:
+    - package.json
+  priority: 20  # higher than npm when pnpm-lock.yaml present
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen-lockfile]
+      production: [--prod]
+      offline: [--offline]
+      prefer_offline: [--prefer-offline]
+      ignore_scripts: [--ignore-scripts]
+      recursive: [--recursive]
+      quiet: [--silent]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+    flags:
+      dev: [--save-dev]
+      optional: [--save-optional]
+      exact: [--save-exact]
+      global: [--global]
+      workspace: [--filter, {value: workspace}]
+      workspace_root: [--workspace-root]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+    flags:
+      global: [--global]
+      recursive: [--recursive]
+      workspace: [--filter, {value: workspace}]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--json]
+      depth: [--depth, {value: depth}]
+      dev: [--dev]
+      prod: [--prod]
+      long: [--long]
+      parseable: [--parseable]
+      recursive: [--recursive]
+      global: [--global]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    flags:
+      json: [--json]
+      recursive: [--recursive]
+      long: [--long]
+      global: [--global]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: outdated
+
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false, validate: npm_package}
+    flags:
+      latest: [--latest]
+      recursive: [--recursive]
+      interactive: [--interactive]
+      global: [--global]
+      workspace: [--filter, {value: workspace}]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - add_optional
+  - remove
+  - update
+  - list
+  - outdated
+  - workspace
+  - json_output

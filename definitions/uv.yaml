@@ -1,0 +1,121 @@
+name: uv
+ecosystem: pypi
+binary: uv
+version: ">=0.4.0"
+status: current
+min_tested: "0.4.0"
+max_tested: "0.9.7"
+
+detection:
+  lockfiles:
+    - uv.lock
+  manifests:
+    - pyproject.toml
+  file_checks:
+    - file: pyproject.toml
+      match: '\[tool\.uv\]'
+  priority: 20  # higher than pip/poetry when uv.lock present
+
+version_detection:
+  command: [--version]
+  pattern: 'uv (\d+\.\d+\.\d+)'
+
+commands:
+  # uv sync installs from lockfile
+  install:
+    base: [sync]
+    flags:
+      frozen: [--frozen]
+      locked: [--locked]
+      no_dev: [--no-dev]
+      all_extras: [--all-extras]
+      offline: [--offline]
+      dry_run: [--dry-run]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add]
+    args:
+      package: {position: 0, required: true, validate: pypi_package}
+    flags:
+      dev: [--dev]
+      optional: [--optional, {value: optional}]
+      group: [--group, {value: group}]
+      editable: [--editable]
+      no_sync: [--no-sync]
+      frozen: [--frozen]
+      quiet: [--quiet]
+      # git options
+      rev: [--rev, {value: rev}]
+      tag: [--tag, {value: tag}]
+      branch: [--branch, {value: branch}]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true, validate: pypi_package}
+    flags:
+      dev: [--dev]
+      optional: [--optional, {value: optional}]
+      group: [--group, {value: group}]
+      no_sync: [--no-sync]
+      frozen: [--frozen]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  # uv tree shows dependency tree
+  list:
+    base: [tree]
+    flags:
+      depth: [--depth, {value: depth}]
+      no_dev: [--no-dev]
+      frozen: [--frozen]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  # uv tree --outdated shows outdated packages
+  outdated:
+    base: [tree]
+    flags:
+      no_dev: [--no-dev]
+      frozen: [--frozen]
+      quiet: [--quiet]
+    default_flags: [--outdated]
+    exit_codes:
+      0: success
+      1: error
+
+  # uv lock --upgrade + uv sync to update
+  # or uv sync --upgrade for in-place update
+  update:
+    base: [sync]
+    args:
+      package: {position: 0, required: false, validate: pypi_package}
+    flags:
+      quiet: [--quiet]
+    default_flags: [--upgrade]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - remove
+  - update
+  - list
+  - outdated
+  - workspace
+  # no native json_output for tree

@@ -1,0 +1,110 @@
+name: cargo
+ecosystem: cargo
+binary: cargo
+version: ">=1.60.0"
+status: current
+min_tested: "1.60.0"
+max_tested: "1.84.0"
+
+detection:
+  lockfiles:
+    - Cargo.lock
+  manifests:
+    - Cargo.toml
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'cargo (\d+\.\d+\.\d+)'
+
+commands:
+  # cargo fetch downloads dependencies without building
+  # cargo build would also work but does more than just install
+  install:
+    base: [fetch]
+    flags:
+      frozen: [--frozen]
+      locked: [--locked]
+      offline: [--offline]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add]
+    args:
+      # cargo add supports package@version syntax
+      package: {position: 0, required: true, validate: cargo_crate}
+    flags:
+      dev: [--dev]
+      build: [--build]
+      optional: [--optional]
+      rename: [--rename, {value: rename}]
+      features: [--features, {value: features}]
+      no_default_features: [--no-default-features]
+      git: [--git, {value: git}]
+      branch: [--branch, {value: branch}]
+      tag: [--tag, {value: tag}]
+      path: [--path, {value: path}]
+      dry_run: [--dry-run]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true, validate: cargo_crate}
+    flags:
+      dev: [--dev]
+      build: [--build]
+      dry_run: [--dry-run]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  # cargo tree shows dependency tree
+  # not exactly "list" but closest native equivalent
+  list:
+    base: [tree]
+    flags:
+      depth: [--depth, {value: depth}]
+      duplicates: [--duplicates]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  # cargo update updates the lockfile
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false, validate: cargo_crate}
+    flags:
+      dry_run: [--dry-run]
+      recursive: [--recursive]
+      precise: [--precise, {value: precise}]
+      workspace: [--workspace]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  # Note: cargo doesn't have native outdated
+  # Users need cargo-outdated third-party tool
+  # We omit this capability
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - remove
+  - update
+  - list
+  - workspace
+  # No json_output for tree by default
+  # No native outdated

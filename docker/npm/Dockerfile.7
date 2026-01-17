@@ -1,0 +1,13 @@
+# npm 7.x (min tested version)
+FROM golang:1.25-alpine AS builder
+
+RUN apk add --no-cache nodejs npm git
+RUN npm install -g npm@7.24.2
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

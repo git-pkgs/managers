@@ -1,0 +1,135 @@
+Version 8.14.0
+Usage: pnpm outdated [<pkg> ...]
+
+Check for outdated packages. The check can be limited to a subset of the installed packages by providing arguments (patterns are supported).
+
+Examples:
+pnpm outdated
+pnpm outdated --long
+pnpm outdated gulp-* @babel/core
+
+Options:
+      --[no-]color         Controls colors in the output. By default, output is
+                           always colored when it goes directly to a terminal
+      --aggregate-output   Aggregate output from child processes that are run in
+                           parallel, and only print output when child process is
+                           finished. It makes reading large logs after running
+                           `pnpm recursive` with `--parallel` or with
+                           `--workspace-concurrency` much easier (especially on
+                           CI). Only `--reporter=append-only` is supported.
+      --compatible         Print only versions that satisfy specs in
+                           package.json
+  -D, --dev                Check only "devDependencies"
+  -C, --dir <dir>          Change to directory <dir> (default:
+                           /Users/andrew/code/git-pkgs/managers/references/pnpm)
+      --global-dir         Specify a custom directory to store global packages
+  -h, --help               Output usage information
+      --loglevel <level>   What level of logs to report. Any logs at or higher
+                           than the given level will be shown. Levels (lowest to
+                           highest): debug, info, warn, error. Or use "--silent"
+                           to turn off all logging.
+      --long               By default, details about the outdated packages (such
+                           as a link to the repo) are not displayed. To display
+                           the details, pass this option.
+      --no-optional        Don't check "optionalDependencies"
+      --no-table           Prints the outdated packages in a list. Good for
+                           small consoles
+  -P, --prod               Check only "dependencies" and "optionalDependencies"
+  -r, --recursive          Check for outdated dependencies in every package
+                           found in subdirectories or in every workspace
+                           package, when executed inside a workspace. For
+                           options that may be used with `-r`, see "pnpm help
+                           recursive"
+      --stream             Stream output from child processes immediately,
+                           prefixed with the originating package directory. This
+                           allows output from different packages to be
+                           interleaved.
+      --use-stderr         Divert all output to stderr
+  -w, --workspace-root     Run the command on the root workspace project
+
+Filtering options (run the command only on packages that satisfy at least one of the selectors):
+      --changed-files-ignore-pattern <pattern>  Defines files to ignore when
+                                                filtering for changed projects
+                                                since the specified
+                                                commit/branch. Usage example:
+                                                pnpm
+                                                --filter="...[origin/master]"
+                                                --changed-files-ignore-
+                                                pattern="**/README.md" build
+      --fail-if-no-match                        If no projects are matched by
+                                                the command, exit with exit code
+                                                1 (fail)
+      --filter !<selector>                      If a selector starts with ! (or
+                                                \! in zsh), it means the
+                                                packages matching the selector
+                                                must be excluded. E.g., "pnpm
+                                                --filter !foo" selects all
+                                                packages except "foo"
+      --filter .                                Includes all packages that are
+                                                under the current working
+                                                directory
+      --filter ...^<pattern>                    Includes only the direct and
+                                                indirect dependents of the
+                                                matched packages without
+                                                including the matched packages
+                                                themselves. ^ must be doubled at
+                                                the Windows Command Prompt.
+                                                E.g.: ...^foo (...^^foo in
+                                                Command Prompt)
+      --filter ...<pattern>                     Includes all direct and indirect
+                                                dependents of the matched
+                                                packages. E.g.: ...foo,
+                                                "...@bar/*"
+      --filter ./<dir>                          Includes all packages that are
+                                                inside a given subdirectory.
+                                                E.g.: ./components
+      --filter "[<since>]"                      Includes all packages changed
+                                                since the specified
+                                                commit/branch. E.g.: "[master]",
+                                                "[HEAD~2]". It may be used
+                                                together with "...". So, for
+                                                instance, "...[HEAD~1]" selects
+                                                all packages changed in the last
+                                                commit and their dependents
+      --filter {<dir>}                          Includes all projects that are
+                                                under the specified directory.
+                                                It may be used with "..." to
+                                                select dependents/dependencies
+                                                as well. It also may be combined
+                                                with "[<since>]". For instance,
+                                                all changed projects inside a
+                                                directory:
+                                                "{packages}[origin/master]"
+      --filter <pattern>                        Restricts the scope to package
+                                                names matching the given
+                                                pattern. E.g.: foo, "@bar/*"
+      --filter <pattern>...                     Includes all direct and indirect
+                                                dependencies of the matched
+                                                packages. E.g.: foo...
+      --filter <pattern>^...                    Includes only the direct and
+                                                indirect dependencies of the
+                                                matched packages without
+                                                including the matched packages
+                                                themselves. ^ must be doubled at
+                                                the Windows Command Prompt.
+                                                E.g.: foo^... (foo^^... in
+                                                Command Prompt)
+      --filter-prod <pattern>                   Restricts the scope to package
+                                                names matching the given pattern
+                                                similar to --filter, but it
+                                                ignores devDependencies when
+                                                searching for dependencies and
+                                                dependents.
+      --test-pattern <pattern>                  Defines files related to tests.
+                                                Useful with the changed since
+                                                filter. When selecting only
+                                                changed packages and their
+                                                dependent packages, the
+                                                dependent packages will be
+                                                ignored in case a package has
+                                                changes only in tests. Usage
+                                                example: pnpm
+                                                --filter="...[origin/master]"
+                                                --test-pattern="test/*" test
+
+Visit https://pnpm.io/8.x/cli/outdated for documentation about this command.

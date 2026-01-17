@@ -1,0 +1,14 @@
+# Go 1.18 - note: we use 1.24 for build since go.mod requires it
+# This Dockerfile is for reference; actual go version testing would need
+# a different approach since we can't easily downgrade Go
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

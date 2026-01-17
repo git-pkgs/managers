@@ -1,0 +1,117 @@
+name: yarn
+ecosystem: npm
+binary: yarn
+version: ">=1.22.0"
+status: current
+min_tested: "1.22.0"
+max_tested: "1.22.22"
+
+# Note: This is for yarn classic (v1). Yarn berry (v2+) has different commands.
+
+detection:
+  lockfiles:
+    - yarn.lock
+  manifests:
+    - package.json
+  file_checks:
+    # Yarn berry uses .yarnrc.yml, classic uses .yarnrc
+    - file: .yarnrc.yml
+      exists: false
+  priority: 15  # higher than npm when yarn.lock present
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen-lockfile]
+      production: [--production]
+      offline: [--offline]
+      prefer_offline: [--prefer-offline]
+      ignore_scripts: [--ignore-scripts]
+      silent: [--silent]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+    flags:
+      dev: [--dev]
+      peer: [--peer]
+      optional: [--optional]
+      exact: [--exact]
+      tilde: [--tilde]
+      ignore_workspace_root_check: [--ignore-workspace-root-check]
+      silent: [--silent]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+    flags:
+      silent: [--silent]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--json]
+      depth: [--depth, {value: depth}]
+      pattern: [--pattern, {value: pattern}]
+      silent: [--silent]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    args:
+      package: {position: 0, required: false, validate: npm_package}
+    flags:
+      json: [--json]
+      silent: [--silent]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: outdated
+
+  # yarn uses "upgrade" not "update"
+  update:
+    base: [upgrade]
+    args:
+      package: {position: 0, required: false, validate: npm_package}
+    flags:
+      latest: [--latest]
+      exact: [--exact]
+      tilde: [--tilde]
+      caret: [--caret]
+      silent: [--silent]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - add_optional
+  - add_peer
+  - remove
+  - update
+  - list
+  - outdated
+  - workspace
+  - json_output

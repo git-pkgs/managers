@@ -1,0 +1,109 @@
+name: gomod
+ecosystem: golang
+binary: go
+version: ">=1.18"
+status: current
+min_tested: "1.18"
+max_tested: "1.24.0"
+
+detection:
+  lockfiles:
+    - go.sum
+  manifests:
+    - go.mod
+  priority: 10
+
+version_detection:
+  command: [version]
+  pattern: 'go(\d+\.\d+(?:\.\d+)?)'
+
+commands:
+  # go mod download fetches dependencies
+  install:
+    base: [mod, download]
+    flags:
+      # Go doesn't have frozen in the same sense
+      # -x prints commands being executed
+      verbose: [-x]
+    exit_codes:
+      0: success
+      1: error
+
+  # go get adds or updates dependencies
+  # version is specified as package@version suffix
+  add:
+    base: [get]
+    args:
+      package: {position: 0, required: true, validate: go_module}
+    flags:
+      # -t includes test dependencies
+      test: [-t]
+      # -u updates to newer minor/patch
+      update: [-u]
+      verbose: [-x]
+    exit_codes:
+      0: success
+      1: error
+    then:
+      - base: [mod, tidy]
+
+  remove:
+    base: [get]
+    args:
+      package: {position: 0, required: true, validate: go_module, fixed_suffix: "@none"}
+    exit_codes:
+      0: success
+      1: error
+
+  # go list -m all shows all dependencies
+  list:
+    base: [list, -m]
+    flags:
+      json: [-json]
+      updates: [-u]
+    default_flags: [-json, all]
+    exit_codes:
+      0: success
+      1: error
+
+  # go list -m -u all shows outdated
+  outdated:
+    base: [list, -m, -u]
+    flags:
+      json: [-json]
+    default_flags: [-json, all]
+    exit_codes:
+      0: success
+      1: error
+
+  # go get -u updates dependencies
+  # or go get package@latest for specific
+  update:
+    base: [get, -u]
+    args:
+      package: {position: 0, required: false, validate: go_module}
+    flags:
+      verbose: [-x]
+    exit_codes:
+      0: success
+      1: error
+
+  # go mod tidy is often needed after changes
+  # Not in standard operations but important
+  tidy:
+    base: [mod, tidy]
+    flags:
+      verbose: [-v]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove  # requires override
+  - update
+  - list
+  - outdated
+  - json_output
+  # No add_dev - Go doesn't have dev dependencies

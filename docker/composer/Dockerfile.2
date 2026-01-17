@@ -1,0 +1,16 @@
+# Composer 2.x (minimum supported)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache php php-phar php-json php-mbstring php-openssl php-curl git
+
+# Install Composer 2.0
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+    php composer-setup.php --version=2.0.0 --install-dir=/usr/local/bin --filename=composer && \
+    php -r "unlink('composer-setup.php');"
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

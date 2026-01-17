@@ -1,0 +1,75 @@
+# Poetry - Python dependency management and packaging
+# https://python-poetry.org/
+#
+# Poetry uses pyproject.toml for manifests and poetry.lock for lockfiles.
+# It manages virtual environments automatically.
+
+name: poetry
+ecosystem: pypi
+binary: poetry
+version: ">=1.2.0"
+
+detection:
+  lockfiles:
+    - poetry.lock
+  manifests:
+    - pyproject.toml
+  file_checks:
+    - file: pyproject.toml
+      contains: "[tool.poetry]"
+  priority: 20  # Higher than uv for poetry-specific projects
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--no-root]
+      dev: []  # dev is default
+      production: [--only, main]
+      sync: [--sync]
+    capabilities:
+      frozen_lockfile: true
+
+  add:
+    base: [add]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      dev: [--group, dev]
+      optional: [--optional]
+
+  remove:
+    base: [remove]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      dev: [--group, dev]
+
+  list:
+    base: [show]
+    flags:
+      json: [--format=json]
+      tree: [--tree]
+      top_level: [--top-level]
+
+  outdated:
+    base: [show, --outdated]
+    flags:
+      json: [--format=json]
+      top_level: [--top-level]
+    capabilities:
+      json_output: true
+
+  update:
+    base: [update]
+    args:
+      package:
+        position: 0
+        required: false
+    flags:
+      dry_run: [--dry-run]
+      lock_only: [--lock]

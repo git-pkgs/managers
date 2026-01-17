@@ -1,0 +1,318 @@
+BUNDLE-INSTALL(1)           General Commands Manual          BUNDLE-INSTALL(1)
+
+NNAAMMEE
+       bbuunnddllee--iinnssttaallll - Install the dependencies specified in your Gemfile
+
+SSYYNNOOPPSSIISS
+       bbuunnddllee iinnssttaallll [--force] [--full-index] [--gemfile=GEMFILE]
+       [--jobs=NUMBER] [--local] [--lockfile=LOCKFILE] [--no-cache]
+       [--no-lock] [--prefer-local] [--quiet] [--retry=NUMBER]
+       [--standalone[=GROUP[ GROUP...]]] [--trust-policy=TRUST-POLICY]
+       [--target-rbconfig=TARGET-RBCONFIG]
+
+DDEESSCCRRIIPPTTIIOONN
+       Install the gems specified in your Gemfile(5). If this is the first
+       time you run bundle install (and a GGeemmffiillee..lloocckk does not exist),
+       Bundler will fetch all remote sources, resolve dependencies and install
+       all needed gems.
+
+       If a GGeemmffiillee..lloocckk does exist, and you have not updated your Gemfile(5),
+       Bundler will fetch all remote sources, but use the dependencies
+       specified in the GGeemmffiillee..lloocckk instead of resolving dependencies.
+
+       If a GGeemmffiillee..lloocckk does exist, and you have updated your Gemfile(5),
+       Bundler will use the dependencies in the GGeemmffiillee..lloocckk for all gems that
+       you did not update, but will re-resolve the dependencies of gems that
+       you did update. You can find more information about this update process
+       below under _C_O_N_S_E_R_V_A_T_I_V_E _U_P_D_A_T_I_N_G.
+
+OOPPTTIIOONNSS
+       ----ffoorrccee, ----rreeddoowwnnllooaadd
+              Force reinstalling every gem, even if already installed.
+
+       ----ffuullll--iinnddeexx
+              Bundler will not call Rubygems' API endpoint (default) but
+              download and cache a (currently big) index file of all gems.
+              Performance can be improved for large bundles that seldom change
+              by enabling this option.
+
+       ----ggeemmffiillee==GGEEMMFFIILLEE
+              The location of the Gemfile(5) which Bundler should use. This
+              defaults to a Gemfile(5) in the current working directory. In
+              general, Bundler will assume that the location of the Gemfile(5)
+              is also the project's root and will try to find GGeemmffiillee..lloocckk and
+              vveennddoorr//ccaacchhee relative to this location.
+
+       ----jjoobbss==<<nnuummbbeerr>>, --jj==<<nnuummbbeerr>>
+              The maximum number of parallel download and install jobs. The
+              default is the number of available processors.
+
+       ----llooccaall
+              Do not attempt to connect to rruubbyyggeemmss..oorrgg. Instead, Bundler will
+              use the gems already present in Rubygems' cache or in
+              vveennddoorr//ccaacchhee. Note that if an appropriate platform-specific gem
+              exists on rruubbyyggeemmss..oorrgg it will not be found.
+
+       ----lloocckkffiillee==LLOOCCKKFFIILLEE
+              The location of the lockfile which Bundler should use. This
+              defaults to the Gemfile location with ..lloocckk appended.
+
+       ----pprreeffeerr--llooccaall
+              Force using locally installed gems, or gems already present in
+              Rubygems' cache or in vveennddoorr//ccaacchhee, when resolving, even if
+              newer versions are available remotely. Only attempt to connect
+              to rruubbyyggeemmss..oorrgg for gems that are not present locally.
+
+       ----nnoo--ccaacchhee
+              Do not update the cache in vveennddoorr//ccaacchhee with the newly bundled
+              gems. This does not remove any gems in the cache but keeps the
+              newly bundled gems from being cached during the install.
+
+       ----nnoo--lloocckk
+              Do not create a lockfile. Useful if you want to install
+              dependencies but not lock versions of gems. Recommended for
+              library development, and other situations where the code is
+              expected to work with a range of dependency versions.
+
+              This has the same effect as using lloocckkffiillee ffaallssee in the Gemfile.
+              See gemfile(5) for more information.
+
+       ----qquuiieett
+              Do not print progress information to the standard output.
+
+       ----rreettrryy==[[<<nnuummbbeerr>>]]
+              Retry failed network or git requests for _n_u_m_b_e_r times.
+
+       ----ssttaannddaalloonnee[[==<<lliisstt>>]]
+              Makes a bundle that can work without depending on Rubygems or
+              Bundler at runtime. A space separated list of groups to install
+              can be specified. Bundler creates a directory named bbuunnddllee and
+              installs the bundle there. It also generates a
+              bbuunnddllee//bbuunnddlleerr//sseettuupp..rrbb file to replace Bundler's own setup in
+              the manner required.
+
+       ----ttrruusstt--ppoolliiccyy==TTRRUUSSTT--PPOOLLIICCYY
+              Apply the Rubygems security policy _p_o_l_i_c_y, where policy is one
+              of HHiigghhSSeeccuurriittyy, MMeeddiiuummSSeeccuurriittyy, LLoowwSSeeccuurriittyy, AAllmmoossttNNooSSeeccuurriittyy,
+              or NNooSSeeccuurriittyy. For more details, please see the Rubygems signing
+              documentation linked below in _S_E_E _A_L_S_O.
+
+       ----ttaarrggeett--rrbbccoonnffiigg==TTAARRGGEETT--RRBBCCOONNFFIIGG
+              Path to rbconfig.rb for the deployment target platform.
+
+DDEEPPLLOOYYMMEENNTT MMOODDEE
+       Bundler's defaults are optimized for development. To switch to defaults
+       optimized for deployment and for CI, use the ddeeppllooyymmeenntt setting. Do not
+       activate deployment mode on development machines, as it will cause an
+       error when the Gemfile(5) is modified.
+
+       1.  A GGeemmffiillee..lloocckk is required.
+
+           To ensure that the same versions of the gems you developed with and
+           tested with are also used in deployments, a GGeemmffiillee..lloocckk is
+           required.
+
+           This is mainly to ensure that you remember to check your
+           GGeemmffiillee..lloocckk into version control.
+
+       2.  The GGeemmffiillee..lloocckk must be up to date
+
+           In development, you can modify your Gemfile(5) and re-run bbuunnddllee
+           iinnssttaallll to _c_o_n_s_e_r_v_a_t_i_v_e_l_y _u_p_d_a_t_e your GGeemmffiillee..lloocckk snapshot.
+
+           In deployment, your GGeemmffiillee..lloocckk should be up-to-date with changes
+           made in your Gemfile(5).
+
+       3.  Gems are installed to vveennddoorr//bbuunnddllee not your default system
+           location
+
+           In development, it's convenient to share the gems used in your
+           application with other applications and other scripts that run on
+           the system.
+
+           In deployment, isolation is a more important default. In addition,
+           the user deploying the application may not have permission to
+           install gems to the system, or the web server may not have
+           permission to read them.
+
+           As a result, when ddeeppllooyymmeenntt is configured, bbuunnddllee iinnssttaallll installs
+           gems to the vveennddoorr//bbuunnddllee directory in the application. This may be
+           overridden using the ppaatthh setting.
+
+
+
+
+IINNSSTTAALLLLIINNGG GGRROOUUPPSS
+       By default, bbuunnddllee iinnssttaallll will install all gems in all groups in your
+       Gemfile(5), except those declared for a different platform.
+
+       However, you can explicitly tell Bundler to skip installing certain
+       groups with the wwiitthhoouutt setting. This setting takes a space-separated
+       list of groups.
+
+       While the wwiitthhoouutt setting will skip _i_n_s_t_a_l_l_i_n_g the gems in the
+       specified groups, bbuunnddllee iinnssttaallll will still _d_o_w_n_l_o_a_d those gems and use
+       them to resolve the dependencies of every gem in your Gemfile(5).
+
+       This is so that installing a different set of groups on another machine
+       (such as a production server) will not change the gems and versions
+       that you have already developed and tested against.
+
+       BBuunnddlleerr ooffffeerrss aa rroocckk--ssoolliidd gguuaarraanntteeee tthhaatt tthhee tthhiirrdd--ppaarrttyy ccooddee yyoouu aarree
+       rruunnnniinngg iinn ddeevveellooppmmeenntt aanndd tteessttiinngg iiss aallssoo tthhee tthhiirrdd--ppaarrttyy ccooddee yyoouu aarree
+       rruunnnniinngg iinn pprroodduuccttiioonn.. YYoouu ccaann cchhoooossee ttoo eexxcclluuddee ssoommee ooff tthhaatt ccooddee iinn
+       ddiiffffeerreenntt eennvviirroonnmmeennttss,, bbuutt yyoouu wwiillll nneevveerr bbee ccaauugghhtt ffllaatt--ffooootteedd bbyy
+       ddiiffffeerreenntt vveerrssiioonnss ooff tthhiirrdd--ppaarrttyy ccooddee bbeeiinngg uusseedd iinn ddiiffffeerreenntt
+       eennvviirroonnmmeennttss..
+
+       For a simple illustration, consider the following Gemfile(5):
+
+
+           source 'https://rubygems.org'
+
+           gem 'sinatra'
+
+           group :production do
+             gem 'rack-perftools-profiler'
+           end
+
+
+
+
+       In this case, ssiinnaattrraa depends on any version of Rack (>>== 11..00), while
+       rraacckk--ppeerrffttoooollss--pprrooffiilleerr depends on 1.x (~~>> 11..00).
+
+       When you configure bbuunnddllee ccoonnffiigg wwiitthhoouutt pprroodduuccttiioonn in development, we
+       look at the dependencies of rraacckk--ppeerrffttoooollss--pprrooffiilleerr as well. That way,
+       you do not spend all your time developing against Rack 2.0, using new
+       APIs unavailable in Rack 1.x, only to have Bundler switch to Rack 1.2
+       when the pprroodduuccttiioonn group _i_s used.
+
+       This should not cause any problems in practice, because we do not
+       attempt to iinnssttaallll the gems in the excluded groups, and only evaluate
+       as part of the dependency resolution process.
+
+       This also means that you cannot include different versions of the same
+       gem in different groups, because doing so would result in different
+       sets of dependencies used in development and production. Because of the
+       vagaries of the dependency resolution process, this usually affects
+       more than the gems you list in your Gemfile(5), and can (surprisingly)
+       radically change the gems you are using.
+
+TTHHEE GGEEMMFFIILLEE..LLOOCCKK
+       When you run bbuunnddllee iinnssttaallll, Bundler will persist the full names and
+       versions of all gems that you used (including dependencies of the gems
+       specified in the Gemfile(5)) into a file called GGeemmffiillee..lloocckk.
+
+       Bundler uses this file in all subsequent calls to bbuunnddllee iinnssttaallll, which
+       guarantees that you always use the same exact code, even as your
+       application moves across machines.
+
+       Because of the way dependency resolution works, even a seemingly small
+       change (for instance, an update to a point-release of a dependency of a
+       gem in your Gemfile(5)) can result in radically different gems being
+       needed to satisfy all dependencies.
+
+       As a result, you SSHHOOUULLDD check your GGeemmffiillee..lloocckk into version control,
+       in both applications and gems. If you do not, every machine that checks
+       out your repository (including your production server) will resolve all
+       dependencies again, which will result in different versions of
+       third-party code being used if aannyy of the gems in the Gemfile(5) or any
+       of their dependencies have been updated.
+
+       When Bundler first shipped, the GGeemmffiillee..lloocckk was included in the
+       ..ggiittiiggnnoorree file included with generated gems. Over time, however, it
+       became clear that this practice forces the pain of broken dependencies
+       onto new contributors, while leaving existing contributors potentially
+       unaware of the problem. Since bbuunnddllee iinnssttaallll is usually the first step
+       towards a contribution, the pain of broken dependencies would
+       discourage new contributors from contributing. As a result, we have
+       revised our guidance for gem authors to now recommend checking in the
+       lock for gems.
+
+CCOONNSSEERRVVAATTIIVVEE UUPPDDAATTIINNGG
+       When you make a change to the Gemfile(5) and then run bbuunnddllee iinnssttaallll,
+       Bundler will update only the gems that you modified.
+
+       In other words, if a gem that you ddiidd nnoott mmooddiiffyy worked before you
+       called bbuunnddllee iinnssttaallll, it will continue to use the exact same versions
+       of all dependencies as it used before the update.
+
+       Let's take a look at an example. Here's your original Gemfile(5):
+
+
+           source 'https://rubygems.org'
+
+           gem 'actionpack', '2.3.8'
+           gem 'activemerchant'
+
+
+
+
+       In this case, both aaccttiioonnppaacckk and aaccttiivveemmeerrcchhaanntt depend on
+       aaccttiivveessuuppppoorrtt. The aaccttiioonnppaacckk gem depends on aaccttiivveessuuppppoorrtt 22..33..88 and
+       rraacckk ~~>> 11..11..00, while the aaccttiivveemmeerrcchhaanntt gem depends on aaccttiivveessuuppppoorrtt >>==
+       22..33..22, bbrraaiinnttrreeee >>== 22..00..00, and bbuuiillddeerr >>== 22..00..00.
+
+       When the dependencies are first resolved, Bundler will select
+       aaccttiivveessuuppppoorrtt 22..33..88, which satisfies the requirements of both gems in
+       your Gemfile(5).
+
+       Next, you modify your Gemfile(5) to:
+
+
+           source 'https://rubygems.org'
+
+           gem 'actionpack', '3.0.0.rc'
+           gem 'activemerchant'
+
+
+
+
+       The aaccttiioonnppaacckk 33..00..00..rrcc gem has a number of new dependencies, and
+       updates the aaccttiivveessuuppppoorrtt dependency to == 33..00..00..rrcc and the rraacckk
+       dependency to ~~>> 11..22..11.
+
+       When you run bbuunnddllee iinnssttaallll, Bundler notices that you changed the
+       aaccttiioonnppaacckk gem, but not the aaccttiivveemmeerrcchhaanntt gem. It evaluates the gems
+       currently being used to satisfy its requirements:
+
+       aaccttiivveessuuppppoorrtt 22..33..88
+              also used to satisfy a dependency in aaccttiivveemmeerrcchhaanntt, which is
+              not being updated
+
+       rraacckk ~~>> 11..11..00
+              not currently being used to satisfy another dependency
+
+       Because you did not explicitly ask to update aaccttiivveemmeerrcchhaanntt, you would
+       not expect it to suddenly stop working after updating aaccttiioonnppaacckk.
+       However, satisfying the new aaccttiivveessuuppppoorrtt 33..00..00..rrcc dependency of
+       actionpack requires updating one of its dependencies.
+
+       Even though aaccttiivveemmeerrcchhaanntt declares a very loose dependency that
+       theoretically matches aaccttiivveessuuppppoorrtt 33..00..00..rrcc, Bundler treats gems in
+       your Gemfile(5) that have not changed as an atomic unit together with
+       their dependencies. In this case, the aaccttiivveemmeerrcchhaanntt dependency is
+       treated as aaccttiivveemmeerrcchhaanntt 11..77..11 ++ aaccttiivveessuuppppoorrtt 22..33..88, so bbuunnddllee
+       iinnssttaallll will report that it cannot update aaccttiioonnppaacckk.
+
+       To explicitly update aaccttiioonnppaacckk, including its dependencies which other
+       gems in the Gemfile(5) still depend on, run bbuunnddllee uuppddaattee aaccttiioonnppaacckk
+       (see bbuunnddllee uuppddaattee((11))).
+
+       SSuummmmaarryy: In general, after making a change to the Gemfile(5) , you
+       should first try to run bbuunnddllee iinnssttaallll, which will guarantee that no
+       other gem in the Gemfile(5) is impacted by the change. If that does not
+       work, run bundle update(1) _b_u_n_d_l_e_-_u_p_d_a_t_e_._1_._h_t_m_l.
+
+SSEEEE AALLSSOO
+       •   Gem install docs
+           _h_t_t_p_s_:_/_/_g_u_i_d_e_s_._r_u_b_y_g_e_m_s_._o_r_g_/_r_u_b_y_g_e_m_s_-_b_a_s_i_c_s_/_#_i_n_s_t_a_l_l_i_n_g_-_g_e_m_s
+
+       •   Rubygems signing docs _h_t_t_p_s_:_/_/_g_u_i_d_e_s_._r_u_b_y_g_e_m_s_._o_r_g_/_s_e_c_u_r_i_t_y_/
+
+
+
+
+
+                                September 2025               BUNDLE-INSTALL(1)

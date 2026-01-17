@@ -1,0 +1,18 @@
+# Dart 2.15+ (minimum supported for pub)
+FROM golang:1.25-alpine
+
+# Install Dart SDK
+RUN apk add --no-cache curl git bash && \
+    curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/dart.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/dart.gpg arch=amd64] https://storage.googleapis.com/download.dartlang.org/linux/debian stable main' > /etc/apt/sources.list.d/dart_stable.list || true
+
+# Use dart from Alpine edge
+RUN echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories && \
+    apk add --no-cache dart@edge
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

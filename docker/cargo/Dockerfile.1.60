@@ -1,0 +1,12 @@
+# cargo 1.60 (min tested version)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache rust cargo git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

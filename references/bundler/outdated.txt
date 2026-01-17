@@ -1,0 +1,127 @@
+BUNDLE-OUTDATED(1)          General Commands Manual         BUNDLE-OUTDATED(1)
+
+NNAAMMEE
+       bbuunnddllee--oouuttddaatteedd - List installed gems with newer versions available
+
+SSYYNNOOPPSSIISS
+       bbuunnddllee oouuttddaatteedd [GEM] [--local] [--pre] [--source] [--filter-strict |
+       --strict] [--update-strict] [--parseable | --porcelain] [--group=GROUP]
+       [--groups] [--patch|--minor|--major] [--filter-major] [--filter-minor]
+       [--filter-patch] [--only-explicit]
+
+DDEESSCCRRIIPPTTIIOONN
+       Outdated lists the names and versions of gems that have a newer version
+       available in the given source. Calling outdated with [GEM [GEM]] will
+       only check for newer versions of the given gems. Prerelease gems are
+       ignored by default. If your gems are up to date, Bundler will exit with
+       a status of 0. Otherwise, it will exit 1.
+
+OOPPTTIIOONNSS
+       ----llooccaall
+              Do not attempt to fetch gems remotely and use the gem cache
+              instead.
+
+       ----pprree  Check for newer pre-release gems.
+
+       ----ssoouurrccee==<<lliisstt>>
+              Check against a specific source.
+
+       ----ffiilltteerr--ssttrriicctt, ----ssttrriicctt
+              Only list newer versions allowed by your Gemfile requirements,
+              also respecting conservative update flags (--patch, --minor,
+              --major).
+
+       ----uuppddaattee--ssttrriicctt
+              Strict conservative resolution, do not allow any gem to be
+              updated past latest --patch | --minor | --major.
+
+       ----ppaarrsseeaabbllee, ----ppoorrcceellaaiinn
+              Use minimal formatting for more parseable output.
+
+       ----ggrroouupp==GGRROOUUPP
+              List gems from a specific group.
+
+       ----ggrroouuppss
+              List gems organized by groups.
+
+       ----mmiinnoorr
+              Prefer updating only to next minor version.
+
+       ----mmaajjoorr
+              Prefer updating to next major version (default).
+
+       ----ppaattcchh
+              Prefer updating only to next patch version.
+
+       ----ffiilltteerr--mmaajjoorr
+              Only list major newer versions.
+
+       ----ffiilltteerr--mmiinnoorr
+              Only list minor newer versions.
+
+       ----ffiilltteerr--ppaattcchh
+              Only list patch newer versions.
+
+       ----oonnllyy--eexxpplliicciitt
+              Only list gems specified in your Gemfile, not their
+              dependencies.
+
+PPAATTCCHH LLEEVVEELL OOPPTTIIOONNSS
+       See bundle update(1) _b_u_n_d_l_e_-_u_p_d_a_t_e_._1_._h_t_m_l for details.
+
+FFIILLTTEERRIINNGG OOUUTTPPUUTT
+       The 3 filtering options do not affect the resolution of versions,
+       merely what versions are shown in the output.
+
+       If the regular output shows the following:
+
+
+           * Gem       Current  Latest  Requested  Groups
+           * faker     1.6.5    1.6.6   ~> 1.4     development, test
+           * hashie    1.2.0    3.4.6   = 1.2.0    default
+           * headless  2.2.3    2.3.1   = 2.2.3    test
+
+
+
+
+       ----ffiilltteerr--mmaajjoorr would only show:
+
+
+           * Gem       Current  Latest  Requested  Groups
+           * hashie    1.2.0    3.4.6   = 1.2.0    default
+
+
+
+
+       ----ffiilltteerr--mmiinnoorr would only show:
+
+
+           * Gem       Current  Latest  Requested  Groups
+           * headless  2.2.3    2.3.1   = 2.2.3    test
+
+
+
+
+       ----ffiilltteerr--ppaattcchh would only show:
+
+
+           * Gem       Current  Latest  Requested  Groups
+           * faker     1.6.5    1.6.6   ~> 1.4     development, test
+
+
+
+
+       Filter options can be combined. ----ffiilltteerr--mmiinnoorr and ----ffiilltteerr--ppaattcchh would
+       show:
+
+
+           * Gem       Current  Latest  Requested  Groups
+           * faker     1.6.5    1.6.6   ~> 1.4     development, test
+
+
+
+
+       Combining all three ffiilltteerr options would be the same result as
+       providing none of them.
+
+                                September 2025              BUNDLE-OUTDATED(1)

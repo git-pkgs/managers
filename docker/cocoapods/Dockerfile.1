@@ -1,0 +1,14 @@
+# CocoaPods 1.10+ (minimum supported)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache ruby ruby-dev build-base git
+
+# Install CocoaPods 1.10.0
+RUN gem install cocoapods -v 1.10.0 --no-document
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

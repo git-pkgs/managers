@@ -1,0 +1,396 @@
+BUNDLE-UPDATE(1)            General Commands Manual           BUNDLE-UPDATE(1)
+
+NNAAMMEE
+       bbuunnddllee--uuppddaattee - Update your gems to the latest available versions
+
+SSYYNNOOPPSSIISS
+       bbuunnddllee uuppddaattee _*_g_e_m_s [--all] [--group=NAME] [--source=NAME] [--local]
+       [--ruby] [--bundler[=VERSION]] [--force] [--full-index]
+       [--gemfile=GEMFILE] [--jobs=NUMBER] [--quiet] [--patch|--minor|--major]
+       [--pre] [--strict] [--conservative]
+
+DDEESSCCRRIIPPTTIIOONN
+       Update the gems specified (all gems, if ----aallll flag is used), ignoring
+       the previously installed gems specified in the GGeemmffiillee..lloocckk. In
+       general, you should use bundle install(1) _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l to
+       install the same exact gems and versions across machines.
+
+       You would use bbuunnddllee uuppddaattee to explicitly update the version of a gem.
+
+OOPPTTIIOONNSS
+       ----aallll  Update all gems specified in Gemfile.
+
+       ----ggrroouupp==<<lliisstt>>, --gg==<<lliisstt>>
+              Only update the gems in the specified group. For instance, you
+              can update all gems in the development group with bbuunnddllee uuppddaattee
+              ----ggrroouupp ddeevveellooppmmeenntt. You can also call bbuunnddllee uuppddaattee rraaiillss
+              ----ggrroouupp tteesstt to update the rails gem and all gems in the test
+              group, for example.
+
+       ----ssoouurrccee==<<lliisstt>>
+              The name of a ::ggiitt or ::ppaatthh source used in the Gemfile(5). For
+              instance, with a ::ggiitt source of
+              hhttttpp::////ggiitthhuubb..ccoomm//rraaiillss//rraaiillss..ggiitt, you would call bbuunnddllee uuppddaattee
+              ----ssoouurrccee rraaiillss
+
+       ----llooccaall
+              Do not attempt to fetch gems remotely and use the gem cache
+              instead.
+
+       ----rruubbyy Update the locked version of Ruby to the current version of
+              Ruby.
+
+       ----bbuunnddlleerr[[==BBUUNNDDLLEERR]]
+              Update the locked version of bundler to the invoked bundler
+              version.
+
+       ----ffoorrccee, ----rreeddoowwnnllooaadd
+              Force reinstalling every gem, even if already installed.
+
+       ----ffuullll--iinnddeexx
+              Fall back to using the single-file index of all gems.
+
+       ----ggeemmffiillee==GGEEMMFFIILLEE
+              Use the specified gemfile instead of [GGeemmffiillee((55))][Gemfile(5)].
+
+       ----jjoobbss==<<nnuummbbeerr>>, --jj==<<nnuummbbeerr>>
+              Specify the number of jobs to run in parallel. The default is
+              the number of available processors.
+
+       ----rreettrryy==[[<<nnuummbbeerr>>]]
+              Retry failed network or git requests for _n_u_m_b_e_r times.
+
+       ----qquuiieett
+              Only output warnings and errors.
+
+       ----ppaattcchh
+              Prefer updating only to next patch version.
+
+       ----mmiinnoorr
+              Prefer updating only to next minor version.
+
+       ----mmaajjoorr
+              Prefer updating to next major version (default).
+
+       ----pprree  Always choose the highest allowed version, regardless of
+              prerelease status.
+
+       ----ssttrriicctt
+              Do not allow any gem to be updated past latest ----ppaattcchh | ----mmiinnoorr
+              | ----mmaajjoorr.
+
+       ----ccoonnsseerrvvaattiivvee
+              Use bundle install conservative update behavior and do not allow
+              indirect dependencies to be updated.
+
+UUPPDDAATTIINNGG AALLLL GGEEMMSS
+       If you run bbuunnddllee uuppddaattee ----aallll, bundler will ignore any previously
+       installed gems and resolve all dependencies again based on the latest
+       versions of all gems available in the sources.
+
+       Consider the following Gemfile(5):
+
+
+           source "https://rubygems.org"
+
+           gem "rails", "3.0.0.rc"
+           gem "nokogiri"
+
+
+
+
+       When you run bundle install(1) _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l the first time,
+       bundler will resolve all of the dependencies, all the way down, and
+       install what you need:
+
+
+           Fetching gem metadata from https://rubygems.org/.........
+           Resolving dependencies...
+           Installing builder 2.1.2
+           Installing abstract 1.0.0
+           Installing rack 1.2.8
+           Using bundler 1.7.6
+           Installing rake 10.4.0
+           Installing polyglot 0.3.5
+           Installing mime-types 1.25.1
+           Installing i18n 0.4.2
+           Installing mini_portile 0.6.1
+           Installing tzinfo 0.3.42
+           Installing rack-mount 0.6.14
+           Installing rack-test 0.5.7
+           Installing treetop 1.4.15
+           Installing thor 0.14.6
+           Installing activesupport 3.0.0.rc
+           Installing erubis 2.6.6
+           Installing activemodel 3.0.0.rc
+           Installing arel 0.4.0
+           Installing mail 2.2.20
+           Installing activeresource 3.0.0.rc
+           Installing actionpack 3.0.0.rc
+           Installing activerecord 3.0.0.rc
+           Installing actionmailer 3.0.0.rc
+           Installing railties 3.0.0.rc
+           Installing rails 3.0.0.rc
+           Installing nokogiri 1.6.5
+
+           Bundle complete! 2 Gemfile dependencies, 26 gems total.
+           Use `bundle show [gemname]` to see where a bundled gem is installed.
+
+
+
+
+       As you can see, even though you have two gems in the Gemfile(5), your
+       application needs 26 different gems in order to run. Bundler remembers
+       the exact versions it installed in GGeemmffiillee..lloocckk. The next time you run
+       bundle install(1) _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l, bundler skips the dependency
+       resolution and installs the same gems as it installed last time.
+
+       After checking in the GGeemmffiillee..lloocckk into version control and cloning it
+       on another machine, running bundle install(1) _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l
+       will _s_t_i_l_l install the gems that you installed last time. You don't
+       need to worry that a new release of eerruubbiiss or mmaaiill changes the gems you
+       use.
+
+       However, from time to time, you might want to update the gems you are
+       using to the newest versions that still match the gems in your
+       Gemfile(5).
+
+       To do this, run bbuunnddllee uuppddaattee ----aallll, which will ignore the
+       GGeemmffiillee..lloocckk, and resolve all the dependencies again. Keep in mind that
+       this process can result in a significantly different set of the 25
+       gems, based on the requirements of new gems that the gem authors
+       released since the last time you ran bbuunnddllee uuppddaattee ----aallll.
+
+UUPPDDAATTIINNGG AA LLIISSTT OOFF GGEEMMSS
+       Sometimes, you want to update a single gem in the Gemfile(5), and leave
+       the rest of the gems that you specified locked to the versions in the
+       GGeemmffiillee..lloocckk.
+
+       For instance, in the scenario above, imagine that nnookkooggiirrii releases
+       version 11..44..44, and you want to update it _w_i_t_h_o_u_t updating Rails and all
+       of its dependencies. To do this, run bbuunnddllee uuppddaattee nnookkooggiirrii.
+
+       Bundler will update nnookkooggiirrii and any of its dependencies, but leave
+       alone Rails and its dependencies.
+
+OOVVEERRLLAAPPPPIINNGG DDEEPPEENNDDEENNCCIIEESS
+       Sometimes, multiple gems declared in your Gemfile(5) are satisfied by
+       the same second-level dependency. For instance, consider the case of
+       tthhiinn and rraacckk--ppeerrffttoooollss--pprrooffiilleerr.
+
+
+           source "https://rubygems.org"
+
+           gem "thin"
+           gem "rack-perftools-profiler"
+
+
+
+
+       The tthhiinn gem depends on rraacckk >>== 11..00, while rraacckk--ppeerrffttoooollss--pprrooffiilleerr
+       depends on rraacckk ~~>> 11..00. If you run bundle install, you get:
+
+
+           Fetching source index for https://rubygems.org/
+           Installing daemons (1.1.0)
+           Installing eventmachine (0.12.10) with native extensions
+           Installing open4 (1.0.1)
+           Installing perftools.rb (0.4.7) with native extensions
+           Installing rack (1.2.1)
+           Installing rack-perftools_profiler (0.0.2)
+           Installing thin (1.2.7) with native extensions
+           Using bundler (1.0.0.rc.3)
+
+
+
+
+       In this case, the two gems have their own set of dependencies, but they
+       share rraacckk in common. If you run bbuunnddllee uuppddaattee tthhiinn, bundler will
+       update ddaaeemmoonnss, eevveennttmmaacchhiinnee and rraacckk, which are dependencies of tthhiinn,
+       but not ooppeenn44 or ppeerrffttoooollss..rrbb, which are dependencies of
+       rraacckk--ppeerrffttoooollss__pprrooffiilleerr. Note that bbuunnddllee uuppddaattee tthhiinn will update rraacckk
+       even though it's _a_l_s_o a dependency of rraacckk--ppeerrffttoooollss__pprrooffiilleerr.
+
+       In short, by default, when you update a gem using bbuunnddllee uuppddaattee,
+       bundler will update all dependencies of that gem, including those that
+       are also dependencies of another gem.
+
+       To prevent updating indirect dependencies, prior to version 1.14 the
+       only option was the CCOONNSSEERRVVAATTIIVVEE UUPPDDAATTIINNGG behavior in bundle install(1)
+       _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l:
+
+       In this scenario, updating the tthhiinn version manually in the Gemfile(5),
+       and then running bundle install(1) _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l will only
+       update ddaaeemmoonnss and eevveennttmmaacchhiinnee, but not rraacckk. For more information,
+       see the CCOONNSSEERRVVAATTIIVVEE UUPPDDAATTIINNGG section of bundle install(1)
+       _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l.
+
+       Starting with 1.14, specifying the ----ccoonnsseerrvvaattiivvee option will also
+       prevent indirect dependencies from being updated.
+
+PPAATTCCHH LLEEVVEELL OOPPTTIIOONNSS
+       Version 1.14 introduced 4 patch-level options that will influence how
+       gem versions are resolved. One of the following options can be used:
+       ----ppaattcchh, ----mmiinnoorr or ----mmaajjoorr. ----ssttrriicctt can be added to further influence
+       resolution.
+
+       ----ppaattcchh
+              Prefer updating only to next patch version.
+
+       ----mmiinnoorr
+              Prefer updating only to next minor version.
+
+       ----mmaajjoorr
+              Prefer updating to next major version (default).
+
+       ----ssttrriicctt
+              Do not allow any gem to be updated past latest ----ppaattcchh | ----mmiinnoorr
+              | ----mmaajjoorr.
+
+       When Bundler is resolving what versions to use to satisfy declared
+       requirements in the Gemfile or in parent gems, it looks up all
+       available versions, filters out any versions that don't satisfy the
+       requirement, and then, by default, sorts them from newest to oldest,
+       considering them in that order.
+
+       Providing one of the patch level options (e.g. ----ppaattcchh) changes the
+       sort order of the satisfying versions, causing Bundler to consider the
+       latest ----ppaattcchh or ----mmiinnoorr version available before other versions. Note
+       that versions outside the stated patch level could still be resolved to
+       if necessary to find a suitable dependency graph.
+
+       For example, if gem 'foo' is locked at 1.0.2, with no gem requirement
+       defined in the Gemfile, and versions 1.0.3, 1.0.4, 1.1.0, 1.1.1, 2.0.0
+       all exist, the default order of preference by default (----mmaajjoorr) will be
+       "2.0.0, 1.1.1, 1.1.0, 1.0.4, 1.0.3, 1.0.2".
+
+       If the ----ppaattcchh option is used, the order of preference will change to
+       "1.0.4, 1.0.3, 1.0.2, 1.1.1, 1.1.0, 2.0.0".
+
+       If the ----mmiinnoorr option is used, the order of preference will change to
+       "1.1.1, 1.1.0, 1.0.4, 1.0.3, 1.0.2, 2.0.0".
+
+       Combining the ----ssttrriicctt option with any of the patch level options will
+       remove any versions beyond the scope of the patch level option, to
+       ensure that no gem is updated that far.
+
+       To continue the previous example, if both ----ppaattcchh and ----ssttrriicctt options
+       are used, the available versions for resolution would be "1.0.4, 1.0.3,
+       1.0.2". If ----mmiinnoorr and ----ssttrriicctt are used, it would be "1.1.1, 1.1.0,
+       1.0.4, 1.0.3, 1.0.2".
+
+       Gem requirements as defined in the Gemfile will still be the first
+       determining factor for what versions are available. If the gem
+       requirement for ffoooo in the Gemfile is '~> 1.0', that will accomplish
+       the same thing as providing the ----mmiinnoorr and ----ssttrriicctt options.
+
+PPAATTCCHH LLEEVVEELL EEXXAAMMPPLLEESS
+       Given the following gem specifications:
+
+
+           foo 1.4.3, requires: ~> bar 2.0
+           foo 1.4.4, requires: ~> bar 2.0
+           foo 1.4.5, requires: ~> bar 2.1
+           foo 1.5.0, requires: ~> bar 2.1
+           foo 1.5.1, requires: ~> bar 3.0
+           bar with versions 2.0.3, 2.0.4, 2.1.0, 2.1.1, 3.0.0
+
+
+
+
+       Gemfile:
+
+
+           gem 'foo'
+
+
+
+
+       Gemfile.lock:
+
+
+           foo (1.4.3)
+             bar (~> 2.0)
+           bar (2.0.3)
+
+
+
+
+       Cases:
+
+
+           #  Command Line                     Result
+           ------------------------------------------------------------
+           1  bundle update --patch            'foo 1.4.5', 'bar 2.1.1'
+           2  bundle update --patch foo        'foo 1.4.5', 'bar 2.1.1'
+           3  bundle update --minor            'foo 1.5.1', 'bar 3.0.0'
+           4  bundle update --minor --strict   'foo 1.5.0', 'bar 2.1.1'
+           5  bundle update --patch --strict   'foo 1.4.4', 'bar 2.0.4'
+
+
+
+
+       In case 1, bar is upgraded to 2.1.1, a minor version increase, because
+       the dependency from foo 1.4.5 required it.
+
+       In case 2, only foo is requested to be unlocked, but bar is also
+       allowed to move because it's not a declared dependency in the Gemfile.
+
+       In case 3, bar goes up a whole major release, because a minor increase
+       is preferred now for foo, and when it goes to 1.5.1, it requires 3.0.0
+       of bar.
+
+       In case 4, foo is preferred up to a minor version, but 1.5.1 won't work
+       because the --strict flag removes bar 3.0.0 from consideration since
+       it's a major increment.
+
+       In case 5, both foo and bar have any minor or major increments removed
+       from consideration because of the --strict flag, so the most they can
+       move is up to 1.4.4 and 2.0.4.
+
+RREECCOOMMMMEENNDDEEDD WWOORRKKFFLLOOWW
+       In general, when working with an application managed with bundler, you
+       should use the following workflow:
+
+       •   After you create your Gemfile(5) for the first time, run
+
+           $ bundle install
+
+       •   Check the resulting GGeemmffiillee..lloocckk into version control
+
+           $ git add Gemfile.lock
+
+       •   When checking out this repository on another development machine,
+           run
+
+           $ bundle install
+
+       •   When checking out this repository on a deployment machine, run
+
+           $ bundle install --deployment
+
+       •   After changing the Gemfile(5) to reflect a new or update
+           dependency, run
+
+           $ bundle install
+
+       •   Make sure to check the updated GGeemmffiillee..lloocckk into version control
+
+           $ git add Gemfile.lock
+
+       •   If bundle install(1) _b_u_n_d_l_e_-_i_n_s_t_a_l_l_._1_._h_t_m_l reports a conflict,
+           manually update the specific gems that you changed in the
+           Gemfile(5)
+
+           $ bundle update rails thin
+
+       •   If you want to update all the gems to the latest possible versions
+           that still match the gems listed in the Gemfile(5), run
+
+           $ bundle update --all
+
+
+
+
+
+                                September 2025                BUNDLE-UPDATE(1)

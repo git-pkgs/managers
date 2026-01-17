@@ -1,0 +1,13 @@
+# yarn 4.x (berry)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache nodejs npm git
+RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

@@ -1,0 +1,45 @@
+BUNDLE-LIST(1)              General Commands Manual             BUNDLE-LIST(1)
+
+NNAAMMEE
+       bbuunnddllee--lliisstt - List all the gems in the bundle
+
+SSYYNNOOPPSSIISS
+       bbuunnddllee lliisstt [--name-only] [--paths] [--without-group=GROUP[ GROUP...]]
+       [--only-group=GROUP[ GROUP...]]
+
+DDEESSCCRRIIPPTTIIOONN
+       Prints a list of all the gems in the bundle including their version.
+
+       Example:
+
+       bundle list --name-only
+
+       bundle list --paths
+
+       bundle list --without-group test
+
+       bundle list --only-group dev
+
+       bundle list --only-group dev test --paths
+
+       bundle list --format json
+
+OOPPTTIIOONNSS
+       ----nnaammee--oonnllyy
+              Print only the name of each gem.
+
+       ----ppaatthhss
+              Print the path to each gem in the bundle.
+
+       ----wwiitthhoouutt--ggrroouupp==<<lliisstt>>
+              A space-separated list of groups of gems to skip during
+              printing.
+
+       ----oonnllyy--ggrroouupp==<<lliisstt>>
+              A space-separated list of groups of gems to print.
+
+       ----ffoorrmmaatt==FFOORRMMAATT
+              Format output ('json' is the only supported format)
+
+
+                                September 2025                  BUNDLE-LIST(1)

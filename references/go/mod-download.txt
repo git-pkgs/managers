@@ -1,0 +1,49 @@
+usage: go mod download [-x] [-json] [-reuse=old.json] [modules]
+
+Download downloads the named modules, which can be module patterns selecting
+dependencies of the main module or module queries of the form path@version.
+
+With no arguments, download applies to the modules needed to build and test
+the packages in the main module: the modules explicitly required by the main
+module if it is at 'go 1.17' or higher, or all transitively-required modules
+if at 'go 1.16' or lower.
+
+The go command will automatically download modules as needed during ordinary
+execution. The "go mod download" command is useful mainly for pre-filling
+the local cache or to compute the answers for a Go module proxy.
+
+By default, download writes nothing to standard output. It may print progress
+messages and errors to standard error.
+
+The -json flag causes download to print a sequence of JSON objects
+to standard output, describing each downloaded module (or failure),
+corresponding to this Go struct:
+
+    type Module struct {
+        Path     string // module path
+        Query    string // version query corresponding to this version
+        Version  string // module version
+        Error    string // error loading module
+        Info     string // absolute path to cached .info file
+        GoMod    string // absolute path to cached .mod file
+        Zip      string // absolute path to cached .zip file
+        Dir      string // absolute path to cached source root directory
+        Sum      string // checksum for path, version (as in go.sum)
+        GoModSum string // checksum for go.mod (as in go.sum)
+        Origin   any    // provenance of module
+        Reuse    bool   // reuse of old module info is safe
+    }
+
+The -reuse flag accepts the name of file containing the JSON output of a
+previous 'go mod download -json' invocation. The go command may use this
+file to determine that a module is unchanged since the previous invocation
+and avoid redownloading it. Modules that are not redownloaded will be marked
+in the new output by setting the Reuse field to true. Normally the module
+cache provides this kind of reuse automatically; the -reuse flag can be
+useful on systems that do not preserve the module cache.
+
+The -x flag causes download to print the commands download executes.
+
+See https://golang.org/ref/mod#go-mod-download for more about 'go mod download'.
+
+See https://golang.org/ref/mod#version-queries for more about version queries.

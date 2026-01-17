@@ -1,0 +1,96 @@
+name: npm
+ecosystem: npm
+binary: npm
+version: ">=7.0.0"
+status: current
+min_tested: "7.0.0"
+max_tested: "10.2.0"
+
+detection:
+  lockfiles:
+    - package-lock.json
+    - npm-shrinkwrap.json
+  manifests:
+    - package.json
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--ci]
+      clean: []
+      production: [--omit=dev]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+      version: {position: 0, suffix: "@", required: false}
+    flags:
+      dev: [--save-dev]
+      optional: [--save-optional]
+      exact: [--save-exact]
+      workspace: [--workspace, {value: workspace}]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [uninstall]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+    flags:
+      workspace: [--workspace, {value: workspace}]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--json]
+      depth: [--depth, {value: depth}]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    flags:
+      json: [--json]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: outdated
+
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false, validate: npm_package}
+    flags:
+      workspace: [--workspace, {value: workspace}]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - add_optional
+  - remove
+  - update
+  - list
+  - outdated
+  - workspace
+  - json_output

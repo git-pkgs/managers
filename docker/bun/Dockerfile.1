@@ -1,0 +1,15 @@
+# Bun 1.0 (minimum supported)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache curl unzip git bash
+
+# Install Bun 1.0.0
+RUN curl -fsSL https://bun.sh/install | bash -s "bun-v1.0.0"
+ENV PATH="/root/.bun/bin:${PATH}"
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

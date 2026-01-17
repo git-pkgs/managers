@@ -1,0 +1,13 @@
+# Dart latest
+FROM golang:1.25-alpine
+
+# Use dart from Alpine edge
+RUN echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories && \
+    apk add --no-cache dart@edge git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

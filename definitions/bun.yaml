@@ -1,0 +1,73 @@
+# Bun - Fast JavaScript runtime and package manager
+# https://bun.sh/
+#
+# Bun uses package.json for manifests and bun.lock (text) or bun.lockb (binary)
+# for lockfiles. It's npm-compatible but significantly faster.
+
+name: bun
+ecosystem: npm
+binary: bun
+version: ">=1.0.0"
+
+detection:
+  lockfiles:
+    - bun.lock
+    - bun.lockb
+  manifests:
+    - package.json
+  priority: 25  # Higher than npm/yarn/pnpm when bun lockfile present
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen-lockfile]
+      dev: []  # dev is default
+      production: [--production]
+      force: [--force]
+    capabilities:
+      frozen_lockfile: true
+
+  add:
+    base: [add]
+    args:
+      package:
+        position: 0
+        required: true
+        validate: npm_package
+    flags:
+      dev: [--dev]
+      optional: [--optional]
+      peer: [--peer]
+      exact: [--exact]
+      global: [--global]
+
+  remove:
+    base: [remove]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      global: [--global]
+
+  list:
+    base: [pm, list]
+    flags:
+      all: [--all]
+
+  outdated:
+    base: [outdated]
+    flags:
+      recursive: [--recursive]
+
+  update:
+    base: [update]
+    args:
+      package:
+        position: 0
+        required: false
+    flags:
+      latest: [--latest]
+      dry_run: [--dry-run]
+      recursive: [--recursive]

@@ -1,0 +1,114 @@
+name: bundler
+ecosystem: gem
+binary: bundle
+version: ">=2.0.0"
+status: current
+min_tested: "2.0.0"
+max_tested: "2.5.4"
+
+detection:
+  lockfiles:
+    - Gemfile.lock
+  manifests:
+    - Gemfile
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen]
+      clean: [--clean]
+      production: [--without, development, test]
+      jobs: [--jobs, {value: jobs}]
+      path: [--path, {value: path}]
+      local: [--local]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add]
+    args:
+      package: {position: 0, required: true, validate: gem_name}
+      version: {flag: --version, required: false}
+    flags:
+      dev: [--group, development]
+      group: [--group, {value: group}]
+      source: [--source, {value: source}]
+      git: [--git, {value: git}]
+      branch: [--branch, {value: branch}]
+      skip_install: [--skip-install]
+      optimistic: [--optimistic]
+      strict: [--strict]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true, validate: gem_name}
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--format=json]
+      name_only: [--name-only]
+      paths: [--paths]
+    default_flags: [--format=json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    args:
+      package: {position: 0, required: false, validate: gem_name}
+    flags:
+      parseable: [--parseable]
+      strict: [--strict]
+      patch: [--patch]
+      minor: [--minor]
+      major: [--major]
+      only_explicit: [--only-explicit]
+      local: [--local]
+    default_flags: [--parseable]
+    exit_codes:
+      0: success
+      1: outdated
+
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false, validate: gem_name}
+    flags:
+      conservative: [--conservative]
+      patch: [--patch]
+      minor: [--minor]
+      major: [--major]
+      strict: [--strict]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - remove
+  - update
+  - list
+  - outdated
+  - json_output

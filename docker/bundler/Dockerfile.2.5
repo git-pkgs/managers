@@ -1,0 +1,13 @@
+# bundler 2.5 (max tested version)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache ruby git
+RUN gem install bundler -v 2.5.4
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

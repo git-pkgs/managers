@@ -1,0 +1,21 @@
+BUNDLE-REMOVE(1)            General Commands Manual           BUNDLE-REMOVE(1)
+
+NNAAMMEE
+       bbuunnddllee--rreemmoovvee - Removes gems from the Gemfile
+
+SSYYNNOOPPSSIISS
+       `bundle remove [GEM [GEM ...]]
+
+DDEESSCCRRIIPPTTIIOONN
+       Removes the given gems from the Gemfile while ensuring that the
+       resulting Gemfile is still valid. If a gem cannot be removed, a warning
+       is printed. If a gem is already absent from the Gemfile, and error is
+       raised.
+
+       Example:
+
+       bundle remove rails
+
+       bundle remove rails rack
+
+                                September 2025                BUNDLE-REMOVE(1)

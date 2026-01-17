@@ -1,0 +1,68 @@
+# Mix - Elixir build tool with Hex package manager
+# https://hexdocs.pm/mix/Mix.html
+#
+# Mix uses mix.exs for manifests and mix.lock for lockfiles.
+# Hex is the package manager that integrates with Mix.
+
+name: mix
+ecosystem: hex
+binary: mix
+version: ">=1.12.0"
+
+detection:
+  lockfiles:
+    - mix.lock
+  manifests:
+    - mix.exs
+  priority: 10
+
+commands:
+  install:
+    base: [deps.get]
+    flags:
+      frozen: [--check-locked]
+      only_prod: [--only, prod]
+    capabilities:
+      frozen_lockfile: true
+
+  add:
+    # Mix doesn't have an "add" command - dependencies are added to mix.exs manually
+    # This is a no-op placeholder
+    base: [deps.get]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Mix requires manual editing of mix.exs to add dependencies"
+
+  remove:
+    # Mix doesn't have a "remove" command - dependencies are removed from mix.exs manually
+    base: [deps.clean]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      unlock: [--unlock]
+    note: "Mix requires manual editing of mix.exs to remove dependencies"
+
+  list:
+    base: [deps]
+    flags:
+      all: [--all]
+
+  outdated:
+    base: [hex.outdated]
+    flags:
+      all: [--all]
+      pre: [--pre]
+    note: "Requires Hex to be installed (mix local.hex)"
+
+  update:
+    base: [deps.update]
+    args:
+      package:
+        position: 0
+        required: false
+    flags:
+      all: [--all]

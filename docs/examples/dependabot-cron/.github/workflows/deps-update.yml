@@ -1,0 +1,81 @@
+# Dependency Update Workflow
+#
+# Runs weekly to check for outdated dependencies and create PRs.
+# Uses the managers library to support multiple package managers.
+
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run every Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for branch operations
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      # Install package managers that might be needed
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Set up Rust
+        uses: dtolnay/rust-action@stable
+
+      - name: Set up Python and uv
+        run: |
+          pip install uv
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build updater
+        run: |
+          # Clone and build the updater tool
+          # In practice, you'd either:
+          # 1. Include the tool in your repo
+          # 2. Install it as a binary
+          # 3. Use a pre-built action
+
+          git clone --depth 1 https://github.com/git-pkgs/managers /tmp/managers
+          cd /tmp/managers/docs/examples/dependabot-cron
+          go build -o /tmp/deps-update .
+
+      - name: Run dependency updates
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/deps-update ${{ github.workspace }}
+
+      - name: Summary
+        run: |
+          echo "## Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the Pull Requests tab for any new update PRs." >> $GITHUB_STEP_SUMMARY

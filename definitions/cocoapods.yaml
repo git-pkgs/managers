@@ -1,0 +1,66 @@
+# CocoaPods - iOS/macOS dependency manager
+# https://cocoapods.org/
+#
+# CocoaPods uses Podfile for manifests and Podfile.lock for lockfiles.
+# Dependencies are declared in the Podfile, then `pod install` fetches them.
+
+name: cocoapods
+ecosystem: cocoapods
+binary: pod
+version: ">=1.10.0"
+
+detection:
+  lockfiles:
+    - Podfile.lock
+  manifests:
+    - Podfile
+  priority: 10
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--deployment]
+      repo_update: [--repo-update]
+      clean: [--clean-install]
+    capabilities:
+      frozen_lockfile: true
+
+  add:
+    # CocoaPods doesn't have an "add" command - edit Podfile manually
+    base: [install]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "CocoaPods requires manual editing of Podfile to add dependencies"
+
+  remove:
+    # CocoaPods doesn't have a "remove" command - edit Podfile manually
+    base: [install]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "CocoaPods requires manual editing of Podfile to remove dependencies"
+
+  list:
+    # pod list shows all available pods, not installed ones
+    # There's no direct equivalent to "list installed"
+    base: [list]
+
+  outdated:
+    base: [outdated]
+    flags:
+      ignore_prerelease: [--ignore-prerelease]
+      no_repo_update: [--no-repo-update]
+
+  update:
+    base: [update]
+    args:
+      package:
+        position: 0
+        required: false
+    flags:
+      no_repo_update: [--no-repo-update]
+      clean: [--clean-install]

@@ -1,0 +1,30 @@
+Update dependencies as recorded in the local lock file
+
+Usage: cargo update [OPTIONS] [SPEC]...
+
+Options:
+  -n, --dry-run                  Don't actually write the lockfile
+      --recursive                Force updating all dependencies of [SPEC]... as well
+      --precise <PRECISE>        Update [SPEC] to exactly PRECISE
+  -b, --breaking                 Update [SPEC] to latest SemVer-breaking version (unstable)
+  -v, --verbose...               Use verbose output (-vv very verbose/build.rs output)
+  -q, --quiet                    Do not print cargo log messages
+      --color <WHEN>             Coloring [possible values: auto, always, never]
+      --config <KEY=VALUE|PATH>  Override a configuration value
+  -Z <FLAG>                      Unstable (nightly-only) flags to Cargo, see 'cargo -Z help' for
+                                 details
+  -h, --help                     Print help
+
+Package Selection:
+  -w, --workspace  Only update the workspace packages
+  [SPEC]...        Package to update
+
+Manifest Options:
+      --manifest-path <PATH>  Path to Cargo.toml
+      --lockfile-path <PATH>  Path to Cargo.lock (unstable)
+      --ignore-rust-version   Ignore `rust-version` specification in packages
+      --locked                Assert that `Cargo.lock` will remain unchanged
+      --offline               Run without accessing the network
+      --frozen                Equivalent to specifying both --locked and --offline
+
+Run `cargo help update` for more detailed information.

@@ -1,0 +1,72 @@
+# Pub - Dart and Flutter package manager
+# https://dart.dev/tools/pub/cmd
+#
+# Pub uses pubspec.yaml for manifests and pubspec.lock for lockfiles.
+# Can be invoked via `dart pub` or `flutter pub`.
+
+name: pub
+ecosystem: pub
+binary: dart
+version: ">=2.15.0"
+
+detection:
+  lockfiles:
+    - pubspec.lock
+  manifests:
+    - pubspec.yaml
+  priority: 10
+
+commands:
+  install:
+    base: [pub, get]
+    flags:
+      frozen: [--enforce-lockfile]
+      offline: [--offline]
+    capabilities:
+      frozen_lockfile: true
+
+  add:
+    base: [pub, add]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      dev: []  # Use "dev:package" syntax instead
+      dry_run: [--dry-run]
+
+  remove:
+    base: [pub, remove]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      dry_run: [--dry-run]
+
+  list:
+    base: [pub, deps]
+    flags:
+      json: [--json]
+      tree: [--style=tree]
+      flat: [--style=list]
+
+  outdated:
+    base: [pub, outdated]
+    flags:
+      json: [--json]
+      all: [--show-all]
+      transitive: [--transitive]
+      prereleases: [--prereleases]
+    capabilities:
+      json_output: true
+
+  update:
+    base: [pub, upgrade]
+    args:
+      package:
+        position: 0
+        required: false
+    flags:
+      dry_run: [--dry-run]
+      major: [--major-versions]

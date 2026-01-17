@@ -1,0 +1,73 @@
+# Composer - PHP dependency manager
+# https://getcomposer.org/
+#
+# Composer uses composer.json for manifests and composer.lock for lockfiles.
+# The "require" command adds packages, "remove" removes them.
+
+name: composer
+ecosystem: packagist
+binary: composer
+version: ">=2.0.0"
+
+detection:
+  lockfiles:
+    - composer.lock
+  manifests:
+    - composer.json
+  priority: 10
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--no-scripts, --no-plugins]
+      dev: []  # dev is default
+      production: [--no-dev]
+    capabilities:
+      frozen_lockfile: true
+
+  add:
+    base: [require]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      dev: [--dev]
+
+  remove:
+    base: [remove]
+    args:
+      package:
+        position: 0
+        required: true
+    flags:
+      dev: [--dev]
+
+  list:
+    base: [show]
+    flags:
+      json: [--format=json]
+      tree: [--tree]
+      direct: [--direct]
+
+  outdated:
+    base: [outdated]
+    flags:
+      json: [--format=json]
+      direct: [--direct]
+      major: [--major-only]
+      minor: [--minor-only]
+      patch: [--patch-only]
+    capabilities:
+      json_output: true
+
+  update:
+    base: [update]
+    args:
+      package:
+        position: 0
+        required: false
+    flags:
+      dry_run: [--dry-run]
+      production: [--no-dev]
