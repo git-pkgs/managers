@@ -1,10 +1,9 @@
-# Dart latest
-FROM dart:stable AS dart
+# opam latest
+FROM ocaml/opam:debian-12-opam AS ocaml
 FROM golang:1.25-bookworm
 
-# Copy dart from official image
-COPY --from=dart /usr/lib/dart /usr/lib/dart
-ENV PATH="/usr/lib/dart/bin:$PATH"
+# Copy opam from official image
+COPY --from=ocaml /usr/bin/opam /usr/local/bin/opam
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 

@@ -1,10 +1,9 @@
-# Dart latest
-FROM dart:stable AS dart
+# Stack 2.x
+FROM haskell:9.8.4 AS haskell
 FROM golang:1.25-bookworm
 
-# Copy dart from official image
-COPY --from=dart /usr/lib/dart /usr/lib/dart
-ENV PATH="/usr/lib/dart/bin:$PATH"
+# Copy stack from haskell image
+COPY --from=haskell /usr/local/bin/stack /usr/local/bin/stack
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 

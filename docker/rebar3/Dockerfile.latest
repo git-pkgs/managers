@@ -1,0 +1,12 @@
+# rebar3 latest
+FROM golang:1.25-alpine
+
+# Install Erlang and rebar3
+RUN apk add --no-cache erlang rebar3 git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

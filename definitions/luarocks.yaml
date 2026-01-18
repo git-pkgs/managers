@@ -1,0 +1,77 @@
+name: luarocks
+ecosystem: luarocks
+binary: luarocks
+version: ">=3.0.0"
+
+detection:
+  lockfiles: []
+  manifests:
+    - "*.rockspec"
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'LuaRocks (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install, --deps-only, .]
+    flags:
+      local: [--local]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      local: [--local]
+      version: [--version, {value: version}]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      local: [--local]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      porcelain: [--porcelain]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [list, --outdated]
+    flags:
+      porcelain: [--porcelain]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    note: "LuaRocks uses install to update packages"
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update

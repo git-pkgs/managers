@@ -1,0 +1,78 @@
+name: opam
+ecosystem: opam
+binary: opam
+version: ">=2.0.0"
+
+detection:
+  lockfiles:
+    - "*.opam.locked"
+  manifests:
+    - "*.opam"
+    - dune-project
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install, --deps-only, .]
+    flags:
+      locked: [--locked]
+      yes: [-y]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      yes: [-y]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      yes: [-y]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list, --installed]
+    flags:
+      json: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [upgrade]
+    args:
+      package: {position: 0, required: false}
+    flags:
+      yes: [-y]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update

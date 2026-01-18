@@ -1,0 +1,76 @@
+name: vcpkg
+ecosystem: vcpkg
+binary: vcpkg
+version: ">=2021.05.12"
+
+detection:
+  lockfiles:
+    - vcpkg.json
+  manifests:
+    - vcpkg.json
+  priority: 10
+
+version_detection:
+  command: [version]
+  pattern: 'vcpkg package management program version (\d{4}-\d{2}-\d{2})'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      clean_after_build: [--clean-after-build]
+      dry_run: [--dry-run]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add, port]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      recurse: [--recurse]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--x-json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [update]
+    note: "vcpkg update checks for outdated packages"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [upgrade]
+    args:
+      package: {position: 0, required: false}
+    flags:
+      no_dry_run: [--no-dry-run]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update

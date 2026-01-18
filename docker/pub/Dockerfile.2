@@ -1,14 +1,12 @@
-# Dart 2.15+ (minimum supported for pub)
-FROM golang:1.25-alpine
+# Dart 2.x (pub package manager)
+FROM dart:stable AS dart
+FROM golang:1.25-bookworm
 
-# Install Dart SDK
-RUN apk add --no-cache curl git bash && \
-    curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/dart.gpg && \
-    echo 'deb [signed-by=/usr/share/keyrings/dart.gpg arch=amd64] https://storage.googleapis.com/download.dartlang.org/linux/debian stable main' > /etc/apt/sources.list.d/dart_stable.list || true
+# Copy dart from official image
+COPY --from=dart /usr/lib/dart /usr/lib/dart
+ENV PATH="/usr/lib/dart/bin:$PATH"
 
-# Use dart from Alpine edge
-RUN echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories && \
-    apk add --no-cache dart@edge
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY go.mod go.sum ./

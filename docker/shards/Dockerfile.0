@@ -1,0 +1,11 @@
+# Shards (Crystal package manager)
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache crystal shards git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

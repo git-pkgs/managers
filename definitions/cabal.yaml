@@ -1,0 +1,69 @@
+name: cabal
+ecosystem: hackage
+binary: cabal
+version: ">=3.0.0"
+
+detection:
+  lockfiles:
+    - cabal.project.freeze
+  manifests:
+    - "*.cabal"
+    - cabal.project
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'cabal-install version (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [build, --only-dependencies]
+    flags:
+      frozen: [--freeze]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Cabal requires manual .cabal file editing
+    base: [build, --only-dependencies]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Cabal requires manual editing of .cabal file to add dependencies"
+
+  remove:
+    # Cabal requires manual .cabal file editing
+    base: [build, --only-dependencies]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Cabal requires manual editing of .cabal file to remove dependencies"
+
+  list:
+    base: [list, --installed]
+    flags:
+      simple: [--simple-output]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [update]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list
+  - outdated
+  - update

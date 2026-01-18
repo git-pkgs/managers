@@ -1,0 +1,75 @@
+name: gradle
+ecosystem: maven
+binary: gradle
+version: ">=7.0.0"
+
+detection:
+  lockfiles:
+    - gradle.lockfile
+  manifests:
+    - build.gradle
+    - build.gradle.kts
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'Gradle (\d+\.\d+(?:\.\d+)?)'
+
+commands:
+  install:
+    base: [dependencies, --write-locks]
+    flags:
+      quiet: [-q]
+      offline: [--offline]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Gradle requires manual build.gradle editing
+    base: [dependencies]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Gradle requires manual editing of build.gradle to add dependencies"
+
+  remove:
+    # Gradle requires manual build.gradle editing
+    base: [dependencies]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Gradle requires manual editing of build.gradle to remove dependencies"
+
+  list:
+    base: [dependencies]
+    flags:
+      quiet: [-q]
+      configuration: [--configuration, {value: configuration}]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    # Requires the com.github.ben-manes.versions plugin
+    base: [dependencyUpdates]
+    flags:
+      quiet: [-q]
+    note: "Requires com.github.ben-manes.versions plugin"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    # Gradle doesn't have native update command
+    base: [dependencies, --write-locks]
+    note: "Gradle requires manual version updates in build.gradle"
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list

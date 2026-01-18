@@ -1,0 +1,65 @@
+name: sbt
+ecosystem: maven
+binary: sbt
+version: ">=1.5.0"
+
+detection:
+  lockfiles: []
+  manifests:
+    - build.sbt
+    - project/build.properties
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'sbt.* (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [update]
+    flags:
+      offline: [--offline]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # SBT requires manual build.sbt editing
+    base: [update]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "SBT requires manual editing of build.sbt to add dependencies"
+
+  remove:
+    # SBT requires manual build.sbt editing
+    base: [update]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "SBT requires manual editing of build.sbt to remove dependencies"
+
+  list:
+    base: [dependencyTree]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [dependencyUpdates]
+    note: "Requires sbt-updates plugin"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [update]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list

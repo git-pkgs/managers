@@ -1,0 +1,15 @@
+# Swift 5.x
+FROM swift:5.10 AS swift
+FROM golang:1.25-alpine
+
+# Copy Swift from official image (Ubuntu-based)
+COPY --from=swift /usr /usr
+
+RUN apk add --no-cache git libstdc++
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

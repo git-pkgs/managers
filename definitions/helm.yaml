@@ -1,0 +1,75 @@
+name: helm
+ecosystem: helm
+binary: helm
+version: ">=3.0.0"
+
+detection:
+  lockfiles:
+    - Chart.lock
+  manifests:
+    - Chart.yaml
+  priority: 10
+
+version_detection:
+  command: [version, --short]
+  pattern: 'v(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [dependency, build]
+    flags:
+      skip_refresh: [--skip-refresh]
+      verify: [--verify]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # helm repo add for repositories
+    base: [repo, add]
+    args:
+      package: {position: 0, required: true}
+      url: {position: 1, required: true}
+    flags:
+      force_update: [--force-update]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [repo, remove]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [dependency, list]
+    flags:
+      json: [--output, json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    # No direct outdated command; use dependency list
+    base: [dependency, list]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [dependency, update]
+    flags:
+      skip_refresh: [--skip-refresh]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - update

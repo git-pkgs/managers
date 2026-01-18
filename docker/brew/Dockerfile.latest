@@ -1,10 +1,10 @@
-# Dart latest
-FROM dart:stable AS dart
+# Homebrew (Linux version)
+FROM homebrew/brew:latest AS brew
 FROM golang:1.25-bookworm
 
-# Copy dart from official image
-COPY --from=dart /usr/lib/dart /usr/lib/dart
-ENV PATH="/usr/lib/dart/bin:$PATH"
+# Copy brew from official image
+COPY --from=brew /home/linuxbrew/.linuxbrew /home/linuxbrew/.linuxbrew
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 

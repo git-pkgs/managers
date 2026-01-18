@@ -1,0 +1,70 @@
+name: stack
+ecosystem: hackage
+binary: stack
+version: ">=2.7.0"
+
+detection:
+  lockfiles:
+    - stack.yaml.lock
+  manifests:
+    - stack.yaml
+    - package.yaml
+  priority: 15
+
+version_detection:
+  command: [--version]
+  pattern: 'Version (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [build, --only-dependencies]
+    flags:
+      test: [--test]
+      bench: [--bench]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Stack requires manual package.yaml/stack.yaml editing
+    base: [build, --only-dependencies]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Stack requires manual editing of package.yaml to add dependencies"
+
+  remove:
+    # Stack requires manual package.yaml/stack.yaml editing
+    base: [build, --only-dependencies]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Stack requires manual editing of package.yaml to remove dependencies"
+
+  list:
+    base: [ls, dependencies]
+    flags:
+      json: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [ls, dependencies, --outdated]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [update]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list
+  - outdated
+  - update

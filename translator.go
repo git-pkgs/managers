@@ -2,6 +2,7 @@ package managers
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/git-pkgs/managers/definitions"
 )
@@ -100,14 +101,37 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 	}
 	args = append(args, base...)
 
-	// Process args in a deterministic order
+	// Process args in a deterministic order by position
 	// First handle package, then version (for suffix handling)
 	packageVal := ""
 	if val, ok := input.Args["package"]; ok {
 		packageVal = val
 	}
 
+	// Sort args by position to ensure deterministic order
+	// Flag-style args (with argDef.Flag set) should come after positional args
+	type argEntry struct {
+		name   string
+		argDef definitions.Arg
+	}
+	var sortedArgs []argEntry
 	for name, argDef := range cmd.Args {
+		sortedArgs = append(sortedArgs, argEntry{name, argDef})
+	}
+	sort.Slice(sortedArgs, func(i, j int) bool {
+		// Flag-style args come after positional args
+		iIsFlag := sortedArgs[i].argDef.Flag != ""
+		jIsFlag := sortedArgs[j].argDef.Flag != ""
+		if iIsFlag != jIsFlag {
+			return !iIsFlag // positional args (non-flag) come first
+		}
+		// Within same category, sort by position
+		return sortedArgs[i].argDef.Position < sortedArgs[j].argDef.Position
+	})
+
+	for _, entry := range sortedArgs {
+		name := entry.name
+		argDef := entry.argDef
 		val, provided := input.Args[name]
 		if !provided {
 			if argDef.Required {

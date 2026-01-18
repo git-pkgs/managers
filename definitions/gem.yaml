@@ -1,0 +1,85 @@
+name: gem
+ecosystem: rubygems
+binary: gem
+version: ">=3.0.0"
+
+detection:
+  lockfiles: []
+  manifests:
+    - "*.gemspec"
+  priority: 5
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    args:
+      package: {position: 0, required: false}
+    flags:
+      no_document: [--no-document]
+      conservative: [--conservative]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true, validate: gem_name}
+      version: {prefix: "--version ", required: false}
+    flags:
+      version: [--version, {value: version}]
+      no_document: [--no-document]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [uninstall]
+    args:
+      package: {position: 0, required: true, validate: gem_name}
+    flags:
+      executables: [--executables]
+      all: [--all]
+      force: [--force]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      local: [--local]
+      remote: [--remote]
+    default_flags: [--local]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false, validate: gem_name}
+    flags:
+      system: [--system]
+      no_document: [--no-document]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update

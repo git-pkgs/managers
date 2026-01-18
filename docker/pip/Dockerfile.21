@@ -1,0 +1,11 @@
+# pip 21.x
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache python3 py3-pip git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

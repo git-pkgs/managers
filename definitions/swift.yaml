@@ -1,0 +1,76 @@
+name: swift
+ecosystem: swift
+binary: swift
+version: ">=5.6.0"
+
+detection:
+  lockfiles:
+    - Package.resolved
+  manifests:
+    - Package.swift
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'Swift version (\d+\.\d+(?:\.\d+)?)'
+
+commands:
+  install:
+    base: [package, resolve]
+    flags:
+      verbose: [-v]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [package, add-dependency]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      from: [--from, {value: from}]
+      up_to_next_major: [--up-to-next-major-from, {value: up_to_next_major}]
+      up_to_next_minor: [--up-to-next-minor-from, {value: up_to_next_minor}]
+      exact: [--exact, {value: exact}]
+      branch: [--branch, {value: branch}]
+      revision: [--revision, {value: revision}]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    # Swift PM requires manual Package.swift editing for removal
+    base: [package, resolve]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Swift PM requires manual editing of Package.swift to remove dependencies"
+
+  list:
+    base: [package, show-dependencies]
+    flags:
+      format: [--format, {value: format}]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [package, update, --dry-run]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [package, update]
+    args:
+      package: {position: 0, required: false}
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - list
+  - update

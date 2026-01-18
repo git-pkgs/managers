@@ -1,0 +1,74 @@
+name: maven
+ecosystem: maven
+binary: mvn
+version: ">=3.6.0"
+
+detection:
+  lockfiles: []
+  manifests:
+    - pom.xml
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'Apache Maven (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [dependency:resolve]
+    flags:
+      offline: [-o]
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Maven requires manual pom.xml editing
+    base: [dependency:resolve]
+    args:
+      package:
+        position: 0
+        required: true
+        validate: maven_artifact
+    note: "Maven requires manual editing of pom.xml to add dependencies"
+
+  remove:
+    # Maven requires manual pom.xml editing
+    base: [dependency:resolve]
+    args:
+      package:
+        position: 0
+        required: true
+        validate: maven_artifact
+    note: "Maven requires manual editing of pom.xml to remove dependencies"
+
+  list:
+    base: [dependency:list]
+    flags:
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [versions:display-dependency-updates]
+    flags:
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [versions:use-latest-releases]
+    flags:
+      no_backup: [-DgenerateBackupPoms=false]
+    default_flags: [-DgenerateBackupPoms=false]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list
+  - outdated

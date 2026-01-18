@@ -1,0 +1,80 @@
+name: cpanm
+ecosystem: cpan
+binary: cpanm
+version: ">=1.7000"
+
+detection:
+  lockfiles:
+    - cpanfile.snapshot
+  manifests:
+    - cpanfile
+    - Makefile.PL
+    - Build.PL
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'cpanm .* version (\d+\.\d+)'
+
+commands:
+  install:
+    base: [--installdeps, .]
+    flags:
+      notest: [--notest]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [--install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      notest: [--notest]
+      quiet: [--quiet]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    # cpanm doesn't have uninstall; use cpan -u or pm-uninstall
+    base: [--uninstall]
+    args:
+      package: {position: 0, required: true}
+    note: "May require App::pmuninstall"
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    # Use cpan -l or instmodsh
+    base: [--info]
+    args:
+      package: {position: 0, required: true}
+    note: "cpanm --info shows info for a single module"
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    # cpan-outdated is a separate tool
+    base: [--info]
+    note: "Use cpan-outdated for checking outdated modules"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [--install]
+    args:
+      package: {position: 0, required: true}
+    note: "cpanm --install updates to latest version"
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - update

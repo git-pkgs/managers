@@ -1,0 +1,88 @@
+name: nuget
+ecosystem: nuget
+binary: dotnet
+version: ">=6.0.0"
+
+detection:
+  lockfiles:
+    - packages.lock.json
+  manifests:
+    - "*.csproj"
+    - "*.fsproj"
+    - "*.vbproj"
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [restore]
+    base_overrides:
+      frozen: [restore, --locked-mode]
+    flags:
+      verbosity: [--verbosity, {value: verbosity}]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add, package]
+    args:
+      package: {position: 0, required: true}
+      version: {prefix: "--version ", required: false}
+    flags:
+      version: [--version, {value: version}]
+      prerelease: [--prerelease]
+      source: [--source, {value: source}]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove, package]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list, package]
+    flags:
+      outdated: [--outdated]
+      include_transitive: [--include-transitive]
+      format: [--format, {value: format}]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [list, package, --outdated]
+    flags:
+      include_transitive: [--include-transitive]
+      format: [--format, {value: format}]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    # dotnet uses add package to update to newer version
+    base: [add, package]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      version: [--version, {value: version}]
+    note: "Use 'dotnet add package <pkg>' to update to latest or specific version"
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - remove
+  - list
+  - outdated

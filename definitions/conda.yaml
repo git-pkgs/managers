@@ -1,0 +1,87 @@
+name: conda
+ecosystem: conda
+binary: conda
+version: ">=4.10.0"
+
+detection:
+  lockfiles:
+    - conda-lock.yml
+  manifests:
+    - environment.yml
+    - environment.yaml
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'conda (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install, --yes]
+    base_overrides:
+      frozen: [install, --yes, --freeze-installed]
+    flags:
+      quiet: [-q]
+      channel: [-c, {value: channel}]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install, --yes]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      channel: [-c, {value: channel}]
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove, --yes]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--json]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [search, --outdated]
+    flags:
+      json: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [update, --yes]
+    args:
+      package: {position: 0, required: false}
+    flags:
+      all: [--all]
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - remove
+  - list
+  - outdated
+  - update
+  - json_output

@@ -1,10 +1,10 @@
-# Dart latest
-FROM dart:stable AS dart
+# Conda 4.x (Miniconda)
+FROM continuumio/miniconda3:latest AS conda
 FROM golang:1.25-bookworm
 
-# Copy dart from official image
-COPY --from=dart /usr/lib/dart /usr/lib/dart
-ENV PATH="/usr/lib/dart/bin:$PATH"
+# Copy conda from official image
+COPY --from=conda /opt/conda /opt/conda
+ENV PATH="/opt/conda/bin:$PATH"
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 

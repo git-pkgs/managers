@@ -2,7 +2,8 @@
 FROM golang:1.25-alpine
 
 RUN apk add --no-cache nodejs npm git
-RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+# Install corepack via npm since Alpine's nodejs doesn't include it
+RUN npm install -g corepack && corepack enable && corepack prepare yarn@4.6.0 --activate
 
 WORKDIR /app
 COPY go.mod go.sum ./

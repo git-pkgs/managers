@@ -1,0 +1,70 @@
+name: rebar3
+ecosystem: hex
+binary: rebar3
+version: ">=3.18.0"
+
+detection:
+  lockfiles:
+    - rebar.lock
+  manifests:
+    - rebar.config
+  priority: 10
+
+version_detection:
+  command: [version]
+  pattern: 'rebar (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [get-deps]
+    flags:
+      upgrade: [--upgrade]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Rebar3 requires manual rebar.config editing
+    base: [get-deps]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Rebar3 requires manual editing of rebar.config to add dependencies"
+
+  remove:
+    # Rebar3 requires manual rebar.config editing
+    base: [get-deps]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Rebar3 requires manual editing of rebar.config to remove dependencies"
+
+  list:
+    base: [deps]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [hex, outdated]
+    note: "Requires hex plugin"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [upgrade]
+    args:
+      package: {position: 0, required: false}
+    flags:
+      all: [--all]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list
+  - update

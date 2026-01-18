@@ -1,0 +1,87 @@
+name: pip
+ecosystem: pypi
+binary: pip
+version: ">=21.0.0"
+
+detection:
+  lockfiles:
+    - requirements.txt
+  manifests:
+    - requirements.in
+    - setup.py
+    - setup.cfg
+  priority: 5
+
+version_detection:
+  command: [--version]
+  pattern: 'pip (\d+\.\d+(?:\.\d+)?)'
+
+commands:
+  install:
+    base: [install, -r, requirements.txt]
+    flags:
+      quiet: [-q]
+      upgrade: [--upgrade]
+      no_deps: [--no-deps]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      upgrade: [--upgrade]
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [uninstall, --yes]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--format=json]
+      outdated: [--outdated]
+    default_flags: [--format=json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [list, --outdated]
+    flags:
+      json: [--format=json]
+    default_flags: [--format=json]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [install, --upgrade]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      quiet: [-q]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update
+  - json_output

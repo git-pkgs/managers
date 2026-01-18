@@ -1,0 +1,16 @@
+# Leiningen latest
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache openjdk17 bash curl git
+
+# Install Leiningen
+RUN curl -fsSL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o /usr/local/bin/lein && \
+    chmod +x /usr/local/bin/lein && \
+    lein version
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

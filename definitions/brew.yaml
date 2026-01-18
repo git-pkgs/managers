@@ -1,0 +1,89 @@
+name: brew
+ecosystem: homebrew
+binary: brew
+version: ">=3.0.0"
+
+detection:
+  lockfiles:
+    - Brewfile.lock.json
+  manifests:
+    - Brewfile
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'Homebrew (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [bundle, install]
+    flags:
+      verbose: [--verbose]
+      no_lock: [--no-lock]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      cask: [--cask]
+      quiet: [--quiet]
+      force: [--force]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [uninstall]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      cask: [--cask]
+      force: [--force]
+      zap: [--zap]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list]
+    flags:
+      json: [--json]
+      versions: [--versions]
+      cask: [--cask]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    flags:
+      json: [--json]
+      cask: [--cask]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [upgrade]
+    args:
+      package: {position: 0, required: false}
+    flags:
+      cask: [--cask]
+      greedy: [--greedy]
+      dry_run: [--dry-run]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update
+  - json_output

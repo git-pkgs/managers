@@ -1,0 +1,65 @@
+name: lein
+ecosystem: clojars
+binary: lein
+version: ">=2.9.0"
+
+detection:
+  lockfiles: []
+  manifests:
+    - project.clj
+  priority: 10
+
+version_detection:
+  command: [version]
+  pattern: 'Leiningen (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [deps]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Leiningen requires manual project.clj editing
+    base: [deps]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Leiningen requires manual editing of project.clj to add dependencies"
+
+  remove:
+    # Leiningen requires manual project.clj editing
+    base: [deps]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Leiningen requires manual editing of project.clj to remove dependencies"
+
+  list:
+    base: [deps, ":tree"]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [ancient]
+    note: "Requires lein-ancient plugin"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [ancient, upgrade]
+    flags:
+      all: [":all"]
+    note: "Requires lein-ancient plugin"
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - list

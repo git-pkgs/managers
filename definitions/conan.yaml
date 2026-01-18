@@ -1,0 +1,74 @@
+name: conan
+ecosystem: conan
+binary: conan
+version: ">=2.0.0"
+
+detection:
+  lockfiles:
+    - conan.lock
+  manifests:
+    - conanfile.txt
+    - conanfile.py
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'Conan version (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install, .]
+    flags:
+      build: [--build, {value: build}]
+      profile: [--profile, {value: profile}]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install, --requires]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      build: [--build, {value: build}]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      confirm: [-c]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list, "*:*"]
+    flags:
+      json: [--format=json]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    # Conan 2.x doesn't have direct outdated; use graph info
+    base: [graph, info, .]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [install, ., --update]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - update

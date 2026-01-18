@@ -1,0 +1,76 @@
+name: deno
+ecosystem: deno
+binary: deno
+version: ">=2.0.0"
+
+detection:
+  lockfiles:
+    - deno.lock
+  manifests:
+    - deno.json
+    - deno.jsonc
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'deno (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [add]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      dev: [--dev]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [remove]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    # Deno doesn't have a list command; imports are in deno.json
+    base: [info]
+    note: "Read deno.json imports directly for dependency list"
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    flags:
+      json: [--json]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [outdated, --update]
+    flags:
+      latest: [--latest]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - remove
+  - outdated
+  - update

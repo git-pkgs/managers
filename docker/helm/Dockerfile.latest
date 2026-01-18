@@ -1,0 +1,15 @@
+# Helm latest
+FROM alpine/helm:latest AS helm
+FROM golang:1.25-alpine
+
+# Copy helm from official image
+COPY --from=helm /usr/bin/helm /usr/local/bin/helm
+
+RUN apk add --no-cache git
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

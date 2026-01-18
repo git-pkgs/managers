@@ -1,0 +1,77 @@
+name: nimble
+ecosystem: nimble
+binary: nimble
+version: ">=0.13.0"
+
+detection:
+  lockfiles:
+    - nimble.lock
+  manifests:
+    - "*.nimble"
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'nimble v(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install, --depsOnly]
+    flags:
+      yes: [-y]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      yes: [-y]
+      devel: [--devel]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [uninstall]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      yes: [-y]
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [list, --installed]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    # Nimble doesn't have direct outdated command
+    base: [list, --installed]
+    note: "Check nimble list against available versions"
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+    flags:
+      yes: [-y]
+    note: "Nimble uses install to update packages"
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - update

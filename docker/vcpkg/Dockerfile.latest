@@ -1,0 +1,17 @@
+# vcpkg latest
+FROM golang:1.25
+
+RUN apt-get update && apt-get install -y curl zip unzip tar git build-essential pkg-config
+
+# Install vcpkg
+RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg && \
+    /opt/vcpkg/bootstrap-vcpkg.sh
+ENV PATH="/opt/vcpkg:$PATH"
+ENV VCPKG_ROOT="/opt/vcpkg"
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

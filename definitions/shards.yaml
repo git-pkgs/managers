@@ -1,0 +1,73 @@
+name: shards
+ecosystem: crystal
+binary: shards
+version: ">=0.17.0"
+
+detection:
+  lockfiles:
+    - shard.lock
+  manifests:
+    - shard.yml
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'Shards (\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen]
+      without_development: [--without-development]
+      production: [--production]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    # Shards requires manual shard.yml editing
+    base: [install]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Shards requires manual editing of shard.yml to add dependencies"
+
+  remove:
+    # Shards requires manual shard.yml editing
+    base: [install]
+    args:
+      package:
+        position: 0
+        required: true
+    note: "Shards requires manual editing of shard.yml to remove dependencies"
+
+  list:
+    base: [list]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [outdated]
+    flags:
+      pre: [--pre]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false}
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - install_frozen
+  - list
+  - outdated
+  - update

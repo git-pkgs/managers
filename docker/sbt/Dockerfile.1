@@ -1,0 +1,15 @@
+# sbt 1.x
+FROM golang:1.25-alpine
+
+RUN apk add --no-cache openjdk17 bash curl git
+
+# Install sbt
+RUN curl -fsSL "https://github.com/sbt/sbt/releases/download/v1.9.8/sbt-1.9.8.tgz" | tar xz -C /usr/local && \
+    ln -s /usr/local/sbt/bin/sbt /usr/bin/sbt
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+CMD ["go", "test", "./...", "-v"]

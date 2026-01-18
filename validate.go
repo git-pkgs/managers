@@ -5,11 +5,12 @@ import (
 )
 
 var defaultValidators = map[string]*regexp.Regexp{
-	"package_name": regexp.MustCompile(`^[@a-zA-Z0-9][\w\-\./]*$`),
-	"npm_package":  regexp.MustCompile(`^(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*$`),
-	"gem_name":     regexp.MustCompile(`^[a-zA-Z0-9_-]+$`),
-	"cargo_crate":  regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_-]*$`),
-	"go_module":    regexp.MustCompile(`^[a-zA-Z0-9][\w\-\.\/]*$`),
+	"package_name":   regexp.MustCompile(`^[@a-zA-Z0-9][\w\-\./]*$`),
+	"npm_package":    regexp.MustCompile(`^(@[a-z0-9-~][a-z0-9-._~]*/)?[a-z0-9-~][a-z0-9-._~]*$`),
+	"gem_name":       regexp.MustCompile(`^[a-zA-Z0-9_-]+$`),
+	"cargo_crate":    regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_-]*$`),
+	"go_module":      regexp.MustCompile(`^[a-zA-Z0-9][\w\-\.\/]*$`),
+	"maven_artifact": regexp.MustCompile(`^[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+$`),
 }
 
 var maxLengths = map[string]int{
