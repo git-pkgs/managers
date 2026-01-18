@@ -48,17 +48,39 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | pnpm | npm | pnpm-lock.yaml |
 | yarn | npm | yarn.lock |
 | bun | npm | bun.lock |
-| bundler | rubygems | Gemfile.lock |
+| deno | deno | deno.lock |
+| bundler | gem | Gemfile.lock |
+| gem | gem | - |
 | cargo | cargo | Cargo.lock |
 | gomod | go | go.sum |
+| pip | pypi | requirements.txt |
 | uv | pypi | uv.lock |
 | poetry | pypi | poetry.lock |
+| conda | conda | conda-lock.yml |
 | composer | packagist | composer.lock |
 | mix | hex | mix.lock |
+| rebar3 | hex | rebar.lock |
 | pub | pub | pubspec.lock |
 | cocoapods | cocoapods | Podfile.lock |
+| swift | swift | Package.resolved |
+| nuget | nuget | packages.lock.json |
+| maven | maven | - |
+| gradle | maven | gradle.lockfile |
+| sbt | maven | - |
+| cabal | hackage | cabal.project.freeze |
+| stack | hackage | stack.yaml.lock |
+| opam | opam | opam.locked |
+| luarocks | luarocks | - |
+| nimble | nimble | nimble.lock |
+| shards | shards | shard.lock |
+| cpanm | cpan | cpanfile.snapshot |
+| lein | clojars | - |
+| vcpkg | vcpkg | vcpkg.json |
+| conan | conan | conan.lock |
+| helm | helm | Chart.lock |
+| brew | homebrew | - |
 
-All managers support: install, add, remove, list, outdated, update
+Most managers support: install, add, remove, list, outdated, update. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
 
 ## Installation
 
