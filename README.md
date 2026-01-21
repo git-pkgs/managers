@@ -163,6 +163,47 @@ mock.AddResult(managers.Result{
 })
 ```
 
+### Policies
+
+PolicyRunner wraps a Runner and applies checks before commands execute. Use this to enforce security policies, license compliance, or package blocklists.
+
+```go
+// Create a policy runner that wraps the real executor
+runner := managers.NewPolicyRunner(
+    managers.NewExecRunner(),
+    managers.WithPolicyMode(managers.PolicyEnforce),
+)
+
+// Add policies
+runner.AddPolicy(managers.PackageBlocklistPolicy{
+    Blocked: map[string]string{
+        "event-stream": "compromised in 2018",
+    },
+})
+
+// Commands are checked before execution
+result, err := runner.Run(ctx, "/path/to/project", "npm", "install", "event-stream")
+// Returns ErrPolicyViolation
+```
+
+The Policy interface:
+
+```go
+type Policy interface {
+    Name() string
+    Check(ctx context.Context, op *PolicyOperation) (*PolicyResult, error)
+}
+```
+
+PolicyOperation contains the manager name, operation, packages, flags, and the full command. PolicyResult indicates whether to allow or deny, with an optional reason and warnings.
+
+Three modes control enforcement:
+- `PolicyEnforce` - block operations that fail checks
+- `PolicyWarn` - log warnings but allow operations to proceed
+- `PolicyDisabled` - skip all policy checks
+
+Built-in policies include AllowAllPolicy, DenyAllPolicy, and PackageBlocklistPolicy. Implement the Policy interface for custom checks like vulnerability scanning or license validation.
+
 ## Operations
 
 | Operation | Description |

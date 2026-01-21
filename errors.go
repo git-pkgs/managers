@@ -91,3 +91,26 @@ type ErrMissingArgument struct {
 func (e ErrMissingArgument) Error() string {
 	return fmt.Sprintf("missing required argument: %s", e.Argument)
 }
+
+type ErrPolicyViolation struct {
+	Policy  string
+	Reason  string
+	Command []string
+}
+
+func (e ErrPolicyViolation) Error() string {
+	return fmt.Sprintf("policy %q denied operation: %s", e.Policy, e.Reason)
+}
+
+type ErrPolicyCheck struct {
+	Policy string
+	Err    error
+}
+
+func (e ErrPolicyCheck) Error() string {
+	return fmt.Sprintf("policy %q check failed: %v", e.Policy, e.Err)
+}
+
+func (e ErrPolicyCheck) Unwrap() error {
+	return e.Err
+}
