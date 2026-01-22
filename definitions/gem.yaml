@@ -76,6 +76,19 @@ commands:
       0: success
       1: error
 
+  # gem which returns path to main file, extract gem directory
+  # output like: /path/to/gems/rails-7.0.0/lib/rails.rb
+  path:
+    base: [which]
+    args:
+      package: {position: 0, required: true, validate: gem_name}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: regex
+      pattern: '^(.+/gems/[^/]+)'
+
 capabilities:
   - install
   - add
@@ -83,3 +96,4 @@ capabilities:
   - list
   - outdated
   - update
+  - path

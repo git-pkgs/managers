@@ -71,3 +71,27 @@ commands:
       latest: [--latest]
       dry_run: [--dry-run]
       recursive: [--recursive]
+
+  # bun packages are in node_modules/<package>
+  path:
+    base: [pm, ls]
+    args:
+      package: {position: 0, required: true, validate: npm_package, extraction_only: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: template
+      pattern: "node_modules/{package}"
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - add_optional
+  - remove
+  - list
+  - outdated
+  - update
+  - path

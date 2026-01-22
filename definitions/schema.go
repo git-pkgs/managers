@@ -41,15 +41,28 @@ type Command struct {
 	DefaultFlags  []string            `yaml:"default_flags,omitempty"`
 	ExitCodes     map[int]string      `yaml:"exit_codes,omitempty"`
 	Then          []Command           `yaml:"then,omitempty"` // commands to run after this one
+	Extract       *Extract            `yaml:"extract,omitempty"`
+}
+
+type Extract struct {
+	Type          string `yaml:"type"`                     // raw, json, line_prefix, regex, json_array, template
+	Field         string `yaml:"field,omitempty"`          // for json: field name to extract
+	Prefix        string `yaml:"prefix,omitempty"`         // for line_prefix: prefix to match
+	Pattern       string `yaml:"pattern,omitempty"`        // for regex: pattern with capture group; for template: path pattern with {package}
+	ArrayField    string `yaml:"array_field,omitempty"`    // for json_array: array field to search
+	MatchField    string `yaml:"match_field,omitempty"`    // for json_array: field to match against pkg name
+	ExtractField  string `yaml:"extract_field,omitempty"`  // for json_array: field to extract from matched element
+	StripFilename bool   `yaml:"strip_filename,omitempty"` // remove filename from path, returning directory
 }
 
 type Arg struct {
-	Position    int    `yaml:"position"`
-	Required    bool   `yaml:"required"`
-	Validate    string `yaml:"validate,omitempty"`
-	Flag        string `yaml:"flag,omitempty"`
-	Suffix      string `yaml:"suffix,omitempty"`       // append user value with this prefix, e.g. "@" for pkg@version
-	FixedSuffix string `yaml:"fixed_suffix,omitempty"` // always append this suffix, e.g. "@none" for go remove
+	Position       int    `yaml:"position"`
+	Required       bool   `yaml:"required"`
+	Validate       string `yaml:"validate,omitempty"`
+	Flag           string `yaml:"flag,omitempty"`
+	Suffix         string `yaml:"suffix,omitempty"`          // append user value with this prefix, e.g. "@" for pkg@version
+	FixedSuffix    string `yaml:"fixed_suffix,omitempty"`    // always append this suffix, e.g. "@none" for go remove
+	ExtractionOnly bool   `yaml:"extraction_only,omitempty"` // arg is only used for output extraction, not passed to command
 }
 
 type Flag struct {

@@ -134,9 +134,14 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 		argDef := entry.argDef
 		val, provided := input.Args[name]
 		if !provided {
-			if argDef.Required {
+			if argDef.Required && !argDef.ExtractionOnly {
 				return nil, ErrMissingArgument{Argument: name}
 			}
+			continue
+		}
+
+		// Skip extraction-only args - they're used for output parsing, not command building
+		if argDef.ExtractionOnly {
 			continue
 		}
 

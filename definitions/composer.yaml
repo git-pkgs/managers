@@ -71,3 +71,25 @@ commands:
     flags:
       dry_run: [--dry-run]
       production: [--no-dev]
+
+  path:
+    base: [show]
+    args:
+      package:
+        position: 0
+        required: true
+    default_flags: [--path]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - add_dev
+  - remove
+  - update
+  - list
+  - outdated
+  - json_output
+  - path

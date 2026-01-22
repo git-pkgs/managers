@@ -102,6 +102,15 @@ commands:
       0: success
       1: error
 
+  path:
+    base: [info]
+    args:
+      package: {position: 0, required: true, validate: gem_name}
+    default_flags: [--path]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -112,3 +121,4 @@ capabilities:
   - list
   - outdated
   - json_output
+  - path

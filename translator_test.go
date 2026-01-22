@@ -2982,3 +2982,315 @@ func TestCpanmUpdate(t *testing.T) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}
 }
+
+// --- path command tests ---
+
+func TestNpmPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("npm", "path", CommandInput{
+		Args: map[string]string{"package": "lodash"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"npm", "ls", "lodash", "--parseable"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestPnpmPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("pnpm", "path", CommandInput{
+		Args: map[string]string{"package": "lodash"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"pnpm", "list", "lodash", "--parseable", "--depth", "0"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestBundlerPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("bundler", "path", CommandInput{
+		Args: map[string]string{"package": "rails"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"bundle", "info", "rails", "--path"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestPipPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("pip", "path", CommandInput{
+		Args: map[string]string{"package": "requests"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"pip", "show", "requests"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestUvPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("uv", "path", CommandInput{
+		Args: map[string]string{"package": "requests"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"uv", "pip", "show", "requests"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestGomodPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("gomod", "path", CommandInput{
+		Args: map[string]string{"package": "github.com/stretchr/testify"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"go", "list", "-m", "-json", "github.com/stretchr/testify"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestCargoPath(t *testing.T) {
+	tr := loadTranslator(t)
+	// Cargo path uses extraction_only for package, so it shouldn't appear in command
+	cmd, err := tr.BuildCommand("cargo", "path", CommandInput{
+		Args: map[string]string{"package": "serde"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"cargo", "metadata", "--format-version", "1"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestComposerPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("composer", "path", CommandInput{
+		Args: map[string]string{"package": "monolog/monolog"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"composer", "show", "monolog/monolog", "--path"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestBrewPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("brew", "path", CommandInput{
+		Args: map[string]string{"package": "git"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"brew", "--prefix", "git"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestGemPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("gem", "path", CommandInput{
+		Args: map[string]string{"package": "rails"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"gem", "which", "rails"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestDenoPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("deno", "path", CommandInput{
+		Args: map[string]string{"package": "https://deno.land/std/http/server.ts"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"deno", "info", "https://deno.land/std/http/server.ts"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestNimblePath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("nimble", "path", CommandInput{
+		Args: map[string]string{"package": "jester"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"nimble", "path", "jester"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestOpamPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("opam", "path", CommandInput{
+		Args: map[string]string{"package": "lwt"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"opam", "var", "lwt:lib"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestLuarocksPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("luarocks", "path", CommandInput{
+		Args: map[string]string{"package": "luasocket"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"luarocks", "show", "luasocket"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestConanPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("conan", "path", CommandInput{
+		Args: map[string]string{"package": "zlib/1.2.13"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"conan", "cache", "path", "zlib/1.2.13"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestPoetryPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("poetry", "path", CommandInput{
+		Args: map[string]string{"package": "requests"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"poetry", "run", "pip", "show", "requests"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestCondaPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("conda", "path", CommandInput{
+		Args: map[string]string{"package": "numpy"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"conda", "run", "pip", "show", "numpy"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestYarnPath(t *testing.T) {
+	tr := loadTranslator(t)
+	// yarn path uses extraction_only, so package not in command
+	cmd, err := tr.BuildCommand("yarn", "path", CommandInput{
+		Args: map[string]string{"package": "lodash"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"yarn", "list", "--depth=0"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestBunPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("bun", "path", CommandInput{
+		Args: map[string]string{"package": "lodash"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"bun", "pm", "ls"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestMixPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("mix", "path", CommandInput{
+		Args: map[string]string{"package": "phoenix"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"mix", "deps"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestShardsPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("shards", "path", CommandInput{
+		Args: map[string]string{"package": "kemal"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"shards", "list"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRebar3Path(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("rebar3", "path", CommandInput{
+		Args: map[string]string{"package": "cowboy"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"rebar3", "deps"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}

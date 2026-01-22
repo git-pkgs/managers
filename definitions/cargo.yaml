@@ -97,6 +97,23 @@ commands:
   # Users need cargo-outdated third-party tool
   # We omit this capability
 
+  # cargo metadata returns JSON with packages array
+  # each package has name and manifest_path
+  path:
+    base: [metadata]
+    args:
+      package: {position: 0, required: true, validate: cargo_crate, extraction_only: true}
+    default_flags: [--format-version, "1"]
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: json_array
+      array_field: packages
+      match_field: name
+      extract_field: manifest_path
+      strip_filename: true
+
 capabilities:
   - install
   - install_frozen
@@ -106,5 +123,6 @@ capabilities:
   - update
   - list
   - workspace
+  - path
   # No json_output for tree by default
   # No native outdated

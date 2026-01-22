@@ -98,12 +98,25 @@ commands:
       0: success
       1: error
 
+  # go list -m -json <module> returns JSON with Dir field
+  path:
+    base: [list, -m, -json]
+    args:
+      package: {position: 0, required: true, validate: go_module}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: json
+      field: Dir
+
 capabilities:
   - install
   - add
-  - remove  # requires override
+  - remove
   - update
   - list
   - outdated
   - json_output
+  - path
   # No add_dev - Go doesn't have dev dependencies

@@ -68,6 +68,18 @@ commands:
       0: success
       1: error
 
+  # luarocks show <rock> outputs info including install path
+  path:
+    base: [show]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: regex
+      pattern: 'Installed in:\s+(\S+)'
+
 capabilities:
   - install
   - add
@@ -75,3 +87,4 @@ capabilities:
   - list
   - outdated
   - update
+  - path

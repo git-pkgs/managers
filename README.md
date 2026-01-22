@@ -34,6 +34,8 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 
 **IDE plugins** - "Add package" dialog that works for any project type. User types a package name, plugin detects the manager and runs the right command.
 
+**Source exploration** - Open the source code of any installed dependency in your editor. The `path` operation returns the filesystem location regardless of whether it's in node_modules, site-packages, or a cargo registry.
+
 **Dependency updaters** - Build your own Dependabot. Check for outdated packages, create branches, apply updates, open PRs. See the [dependabot-cron example](docs/examples/dependabot-cron/).
 
 **git-pkgs integration** - Add `install`, `update`, `add`, `remove` commands to git-pkgs. See [git-pkgs use cases](docs/git-pkgs-use-cases.md).
@@ -173,6 +175,7 @@ mock.AddResult(managers.Result{
 | `list` | List installed packages |
 | `outdated` | Show packages with available updates |
 | `update` | Update dependencies |
+| `path` | Get filesystem path to installed package |
 
 ### Common flags
 
@@ -181,6 +184,20 @@ mock.AddResult(managers.Result{
 | `dev` | Add as development dependency |
 | `frozen` | Fail if lockfile would change (CI mode) |
 | `json` | Output in JSON format (where supported) |
+
+### Getting package paths
+
+The `path` operation returns the filesystem path to an installed package, useful for source exploration or editor integration:
+
+```go
+manager, _ := managers.Detect("/path/to/project")
+result, _ := manager.Path(ctx, "lodash")
+fmt.Println(result.Path) // "/path/to/project/node_modules/lodash"
+```
+
+The library handles extracting clean paths from various output formats (JSON, line-based, regex patterns). For managers with predictable locations (yarn, mix, shards), paths are computed from templates.
+
+**Managers with path support:** npm, pnpm, yarn, bun, bundler, gem, pip, uv, poetry, conda, gomod, cargo, composer, brew, deno, nimble, opam, luarocks, conan, mix, shards, rebar3
 
 ### Escape hatch
 

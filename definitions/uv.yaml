@@ -108,6 +108,18 @@ commands:
       0: success
       1: error
 
+  # uv pip show works like pip show
+  path:
+    base: [pip, show]
+    args:
+      package: {position: 0, required: true, validate: pypi_package}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: line_prefix
+      prefix: "Location: "
+
 capabilities:
   - install
   - install_frozen
@@ -118,4 +130,5 @@ capabilities:
   - list
   - outdated
   - workspace
+  - path
   # no native json_output for tree

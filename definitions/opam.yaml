@@ -69,6 +69,15 @@ commands:
       0: success
       1: error
 
+  # opam var <pkg>:lib returns the library path
+  path:
+    base: [var]
+    args:
+      package: {position: 0, required: true, fixed_suffix: ":lib"}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
@@ -76,3 +85,4 @@ capabilities:
   - list
   - outdated
   - update
+  - path

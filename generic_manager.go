@@ -150,3 +150,37 @@ func (m *GenericManager) Capabilities() []Capability {
 	}
 	return caps
 }
+
+func (m *GenericManager) Path(ctx context.Context, pkg string) (*PathResult, error) {
+	input := CommandInput{
+		Args: map[string]string{
+			"package": pkg,
+		},
+		Flags: map[string]any{},
+	}
+
+	cmd, err := m.translator.BuildCommand(m.def.Name, "path", input)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := m.runner.Run(ctx, m.dir, cmd...)
+	if err != nil {
+		return nil, err
+	}
+
+	var extract *definitions.Extract
+	if pathCmd, ok := m.def.Commands["path"]; ok {
+		extract = pathCmd.Extract
+	}
+
+	path, err := ExtractPath(result.Stdout, extract, pkg)
+	if err != nil {
+		return &PathResult{Result: result}, err
+	}
+
+	return &PathResult{
+		Path:   path,
+		Result: result,
+	}, nil
+}

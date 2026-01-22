@@ -66,3 +66,23 @@ commands:
         required: false
     flags:
       all: [--all]
+
+  # mix deps are always in deps/<package_name>
+  path:
+    base: [deps]
+    args:
+      package: {position: 0, required: true, extraction_only: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: template
+      pattern: "deps/{package}"
+
+capabilities:
+  - install
+  - install_frozen
+  - list
+  - outdated
+  - update
+  - path

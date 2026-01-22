@@ -76,6 +76,18 @@ commands:
       0: success
       1: error
 
+  # conda run pip show works inside the conda environment
+  path:
+    base: [run, pip, show]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: line_prefix
+      prefix: "Location: "
+
 capabilities:
   - install
   - install_frozen
@@ -85,3 +97,4 @@ capabilities:
   - outdated
   - update
   - json_output
+  - path

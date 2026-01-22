@@ -102,6 +102,20 @@ commands:
       0: success
       1: error
 
+  # yarn packages are in node_modules/<package>
+  # use yarn list to verify package exists, then compute path
+  path:
+    base: [list]
+    args:
+      package: {position: 0, required: true, validate: npm_package, extraction_only: true}
+    default_flags: [--depth=0]
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: template
+      pattern: "node_modules/{package}"
+
 capabilities:
   - install
   - install_frozen
@@ -115,3 +129,4 @@ capabilities:
   - outdated
   - workspace
   - json_output
+  - path
