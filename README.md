@@ -252,6 +252,19 @@ cmd, _ := translator.BuildCommand("npm", "install", managers.CommandInput{
 // Result: ["npm", "install", "--ci", "--legacy-peer-deps"]
 ```
 
+## Configuration files
+
+This library builds and executes CLI commands. It doesn't read or modify package manager configuration files. When commands run, they inherit the environment and respect native config files:
+
+- npm/yarn/pnpm: `.npmrc`, `~/.npmrc`
+- pip/poetry/uv: `pip.conf`, `.pypirc`, `pyproject.toml`
+- bundler: `~/.bundle/config`, `.bundle/config`
+- cargo: `~/.cargo/config.toml`, `.cargo/config.toml`
+- composer: `auth.json`, `config.json`
+- go: `GOPROXY`, `GOPRIVATE` environment variables
+
+Private registries, proxy servers (like Artifactory), scoped registries, and credentials all work as configured for the underlying tool. The library just builds the right command; the CLI handles authentication and registry resolution.
+
 ## How it works
 
 Package managers are defined in YAML files that describe their commands, flags, and arguments. The translator reads these definitions and builds the correct command array for each operation.
