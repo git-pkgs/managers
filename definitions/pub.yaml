@@ -70,3 +70,16 @@ commands:
     flags:
       dry_run: [--dry-run]
       major: [--major-versions]
+
+  # dart pub cache list shows package cache info as JSON
+  # packages are in ~/.pub-cache/hosted/pub.dev/<name>-<version>
+  # Note: No direct single-package path command
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - remove
+  - list
+  - outdated
+  - update

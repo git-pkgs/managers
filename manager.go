@@ -15,6 +15,7 @@ type Manager interface {
 	List(ctx context.Context) (*Result, error)
 	Outdated(ctx context.Context) (*Result, error)
 	Update(ctx context.Context, pkg string) (*Result, error)
+	Path(ctx context.Context, pkg string) (*PathResult, error)
 
 	Supports(cap Capability) bool
 	Capabilities() []Capability
@@ -47,6 +48,11 @@ func (r *Result) Success() bool {
 	return r.ExitCode == 0
 }
 
+type PathResult struct {
+	Path   string // extracted path to the package
+	Result *Result // underlying command result
+}
+
 type ExecContext int
 
 const (
@@ -73,6 +79,7 @@ const (
 	CapJSONOutput
 	CapSBOMCycloneDX
 	CapSBOMSPDX
+	CapPath
 )
 
 var capabilityNames = map[Capability]string{
@@ -91,6 +98,7 @@ var capabilityNames = map[Capability]string{
 	CapJSONOutput:    "json_output",
 	CapSBOMCycloneDX: "sbom_cyclonedx",
 	CapSBOMSPDX:      "sbom_spdx",
+	CapPath:          "path",
 }
 
 func (c Capability) String() string {

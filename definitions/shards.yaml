@@ -65,9 +65,22 @@ commands:
       0: success
       1: error
 
+  # shards dependencies are in lib/<package>
+  path:
+    base: [list]
+    args:
+      package: {position: 0, required: true, extraction_only: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: template
+      pattern: "lib/{package}"
+
 capabilities:
   - install
   - install_frozen
   - list
   - outdated
   - update
+  - path

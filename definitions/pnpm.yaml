@@ -101,6 +101,15 @@ commands:
       0: success
       1: error
 
+  path:
+    base: [list]
+    args:
+      package: {position: 0, required: true, validate: npm_package}
+    default_flags: [--parseable, --depth, "0"]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -113,3 +122,4 @@ capabilities:
   - outdated
   - workspace
   - json_output
+  - path

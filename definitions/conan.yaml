@@ -66,9 +66,19 @@ commands:
       0: success
       1: error
 
+  # conan cache path <package> returns the cache path
+  path:
+    base: [cache, path]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
   - remove
   - list
   - update
+  - path

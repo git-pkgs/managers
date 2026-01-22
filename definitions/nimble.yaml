@@ -69,9 +69,19 @@ commands:
       0: success
       1: error
 
+  # nimble path returns the installation path
+  path:
+    base: [path]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
   - remove
   - list
   - update
+  - path

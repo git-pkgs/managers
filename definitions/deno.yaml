@@ -66,6 +66,18 @@ commands:
       0: success
       1: error
 
+  # deno info <module> shows local cache path
+  path:
+    base: [info]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: line_prefix
+      prefix: "local: "
+
 capabilities:
   - install
   - install_frozen
@@ -74,3 +86,4 @@ capabilities:
   - remove
   - outdated
   - update
+  - path

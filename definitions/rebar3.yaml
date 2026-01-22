@@ -64,7 +64,20 @@ commands:
       0: success
       1: error
 
+  # rebar3 dependencies are in _build/default/lib/<package>
+  path:
+    base: [deps]
+    args:
+      package: {position: 0, required: true, extraction_only: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: template
+      pattern: "_build/default/lib/{package}"
+
 capabilities:
   - install
   - list
   - update
+  - path

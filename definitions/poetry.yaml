@@ -73,3 +73,26 @@ commands:
     flags:
       dry_run: [--dry-run]
       lock_only: [--lock]
+
+  # poetry run pip show works inside the virtualenv
+  path:
+    base: [run, pip, show]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: line_prefix
+      prefix: "Location: "
+
+capabilities:
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - remove
+  - update
+  - list
+  - outdated
+  - path

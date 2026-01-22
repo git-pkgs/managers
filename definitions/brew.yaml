@@ -79,6 +79,15 @@ commands:
       0: success
       1: error
 
+  # brew --prefix <formula> returns the installation path
+  path:
+    base: [--prefix]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
@@ -87,3 +96,4 @@ capabilities:
   - outdated
   - update
   - json_output
+  - path

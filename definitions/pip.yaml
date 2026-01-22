@@ -77,6 +77,17 @@ commands:
       0: success
       1: error
 
+  path:
+    base: [show]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    extract:
+      type: line_prefix
+      prefix: "Location: "
+
 capabilities:
   - install
   - add
@@ -85,3 +96,4 @@ capabilities:
   - outdated
   - update
   - json_output
+  - path
