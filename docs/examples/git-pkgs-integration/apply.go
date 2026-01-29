@@ -208,9 +208,10 @@ func ecosystemToManagerWithFallback(ecosystem, detected string) string {
 // getGitPkgsOutdated calls git-pkgs outdated --json and parses the output
 func getGitPkgsOutdated(repoPath, updateType string) ([]OutdatedPackage, error) {
 	args := []string{"outdated", "--format", "json"}
-	if updateType == "patch" {
+	switch updateType {
+	case "patch":
 		// No filter needed, include all
-	} else if updateType == "minor" {
+	case "minor":
 		args = append(args, "--minor") // Skip patch-only
 	}
 

@@ -128,7 +128,7 @@ func applyUpdate(ctx context.Context, tr *managers.Translator, manager, repoPath
 
 // runCommand executes a command in the specified directory
 func runCommand(ctx context.Context, args []string, dir string) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	_, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
 
 	// In a real implementation, use os/exec
