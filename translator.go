@@ -180,9 +180,7 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 	}
 
 	// Add default flags
-	for _, flagStr := range cmd.DefaultFlags {
-		args = append(args, flagStr)
-	}
+	args = append(args, cmd.DefaultFlags...)
 
 	// Add user-specified flags
 	for name, val := range input.Flags {

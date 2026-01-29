@@ -223,7 +223,7 @@ func updateDependency(ctx context.Context, tr *managers.Translator, managerName,
 	if err := gitCommand(repoPath, "checkout", "-b", branchName); err != nil {
 		return fmt.Errorf("creating branch: %w", err)
 	}
-	defer gitCommand(repoPath, "checkout", "-") // Return to original branch
+	defer func() { _ = gitCommand(repoPath, "checkout", "-") }() // Return to original branch
 
 	// Build and run the update command
 	cmd, err := tr.BuildCommand(managerName, "update", managers.CommandInput{
