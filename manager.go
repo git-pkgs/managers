@@ -16,6 +16,7 @@ type Manager interface {
 	Outdated(ctx context.Context) (*Result, error)
 	Update(ctx context.Context, pkg string) (*Result, error)
 	Path(ctx context.Context, pkg string) (*PathResult, error)
+	Vendor(ctx context.Context) (*Result, error)
 
 	Supports(cap Capability) bool
 	Capabilities() []Capability
@@ -80,6 +81,7 @@ const (
 	CapSBOMCycloneDX
 	CapSBOMSPDX
 	CapPath
+	CapVendor
 )
 
 var capabilityNames = map[Capability]string{
@@ -99,6 +101,7 @@ var capabilityNames = map[Capability]string{
 	CapSBOMCycloneDX: "sbom_cyclonedx",
 	CapSBOMSPDX:      "sbom_spdx",
 	CapPath:          "path",
+	CapVendor:        "vendor",
 }
 
 func (c Capability) String() string {

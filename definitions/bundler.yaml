@@ -111,6 +111,13 @@ commands:
       0: success
       1: error
 
+  # bundle cache caches .gem files into vendor/cache
+  vendor:
+    base: [cache]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -122,3 +129,4 @@ capabilities:
   - outdated
   - json_output
   - path
+  - vendor

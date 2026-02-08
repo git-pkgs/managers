@@ -114,6 +114,13 @@ commands:
       extract_field: manifest_path
       strip_filename: true
 
+  # cargo vendor copies crate sources into vendor/
+  vendor:
+    base: [vendor]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -124,5 +131,6 @@ capabilities:
   - list
   - workspace
   - path
+  - vendor
   # No json_output for tree by default
   # No native outdated

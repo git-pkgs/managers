@@ -3294,3 +3294,65 @@ func TestRebar3Path(t *testing.T) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}
 }
+
+// --- vendor tests ---
+
+func TestGomodVendor(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("gomod", "vendor", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"go", "mod", "vendor"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestCargoVendor(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("cargo", "vendor", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"cargo", "vendor"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestBundlerVendor(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("bundler", "vendor", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"bundle", "cache"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRebar3Vendor(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("rebar3", "vendor", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"rebar3", "vendor"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestPipVendor(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("pip", "vendor", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"pip", "download", "-r", "requirements.txt", "-d", "vendor"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
