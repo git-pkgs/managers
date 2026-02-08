@@ -151,6 +151,20 @@ func (m *GenericManager) Capabilities() []Capability {
 	return caps
 }
 
+func (m *GenericManager) Vendor(ctx context.Context) (*Result, error) {
+	input := CommandInput{
+		Args:  map[string]string{},
+		Flags: map[string]any{},
+	}
+
+	cmd, err := m.translator.BuildCommand(m.def.Name, "vendor", input)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.runner.Run(ctx, m.dir, cmd...)
+}
+
 func (m *GenericManager) Path(ctx context.Context, pkg string) (*PathResult, error) {
 	input := CommandInput{
 		Args: map[string]string{

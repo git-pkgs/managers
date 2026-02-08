@@ -305,6 +305,63 @@ func TestGenericManager_Path_NoPathCommand(t *testing.T) {
 	}
 }
 
+func TestGenericManager_Vendor(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "gomod",
+		Binary: "go",
+		Commands: map[string]definitions.Command{
+			"vendor": {
+				Base: []string{"mod", "vendor"},
+			},
+		},
+		Capabilities: []string{"vendor"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{
+		ExitCode: 0,
+		Stdout:   "",
+	}}
+
+	mgr := newTestManager(def, runner)
+	result, err := mgr.Vendor(context.Background())
+	if err != nil {
+		t.Fatalf("Vendor failed: %v", err)
+	}
+
+	if result.ExitCode != 0 {
+		t.Errorf("got exit code %d, want 0", result.ExitCode)
+	}
+
+	if len(runner.Captured) != 1 {
+		t.Fatalf("expected 1 command, got %d", len(runner.Captured))
+	}
+	expected := []string{"go", "mod", "vendor"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
+func TestGenericManager_Vendor_NoCommand(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "testpkg",
+		Binary: "testpkg",
+		Commands: map[string]definitions.Command{
+			"install": {
+				Base: []string{"install"},
+			},
+		},
+		Capabilities: []string{"install"},
+	}
+
+	runner := NewMockRunner()
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Vendor(context.Background())
+	if err == nil {
+		t.Error("expected error for missing vendor command, got nil")
+	}
+}
+
 func slicesEqual(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

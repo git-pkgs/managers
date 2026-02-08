@@ -76,8 +76,16 @@ commands:
       type: template
       pattern: "_build/default/lib/{package}"
 
+  # rebar3 vendor turns dependencies into top-level apps
+  vendor:
+    base: [vendor]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - list
   - update
   - path
+  - vendor

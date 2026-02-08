@@ -88,6 +88,13 @@ commands:
       type: line_prefix
       prefix: "Location: "
 
+  # pip download fetches packages into a directory
+  vendor:
+    base: [download, -r, requirements.txt, -d, vendor]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
@@ -97,3 +104,4 @@ capabilities:
   - update
   - json_output
   - path
+  - vendor
