@@ -63,8 +63,15 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [ls, dependencies, json]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - list
   - outdated
   - update
+  - resolve

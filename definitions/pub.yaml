@@ -75,6 +75,12 @@ commands:
   # packages are in ~/.pub-cache/hosted/pub.dev/<name>-<version>
   # Note: No direct single-package path command
 
+  resolve:
+    base: [pub, deps]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -83,3 +89,4 @@ capabilities:
   - list
   - outdated
   - update
+  - resolve

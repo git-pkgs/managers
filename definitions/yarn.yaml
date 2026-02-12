@@ -116,6 +116,13 @@ commands:
       type: template
       pattern: "node_modules/{package}"
 
+  resolve:
+    base: [list]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -130,3 +137,4 @@ capabilities:
   - workspace
   - json_output
   - path
+  - resolve

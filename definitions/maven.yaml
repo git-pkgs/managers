@@ -68,7 +68,14 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [dependency:tree]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - list
   - outdated
+  - resolve

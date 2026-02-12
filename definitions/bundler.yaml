@@ -111,6 +111,12 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [list]
+    exit_codes:
+      0: success
+      1: error
+
   # bundle cache caches .gem files into vendor/cache
   vendor:
     base: [cache]
@@ -130,3 +136,4 @@ capabilities:
   - json_output
   - path
   - vendor
+  - resolve

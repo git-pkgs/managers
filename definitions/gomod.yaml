@@ -110,6 +110,12 @@ commands:
       type: json
       field: Dir
 
+  resolve:
+    base: [mod, graph]
+    exit_codes:
+      0: success
+      1: error
+
   # go mod vendor copies all dependencies into vendor/
   vendor:
     base: [mod, vendor]
@@ -127,4 +133,5 @@ capabilities:
   - json_output
   - path
   - vendor
+  - resolve
   # No add_dev - Go doesn't have dev dependencies

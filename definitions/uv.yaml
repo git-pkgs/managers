@@ -120,6 +120,12 @@ commands:
       type: line_prefix
       prefix: "Location: "
 
+  resolve:
+    base: [tree]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -131,4 +137,5 @@ capabilities:
   - outdated
   - workspace
   - path
+  - resolve
   # no native json_output for tree
