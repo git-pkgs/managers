@@ -84,6 +84,13 @@ commands:
       type: template
       pattern: "node_modules/{package}"
 
+  resolve:
+    base: [pm, ls]
+    default_flags: [--all]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -95,3 +102,4 @@ capabilities:
   - outdated
   - update
   - path
+  - resolve

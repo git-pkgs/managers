@@ -79,6 +79,12 @@ commands:
       type: template
       pattern: "deps/{package}"
 
+  resolve:
+    base: [deps.tree]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -86,3 +92,4 @@ capabilities:
   - outdated
   - update
   - path
+  - resolve

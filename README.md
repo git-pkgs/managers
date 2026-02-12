@@ -4,7 +4,7 @@ A Go library that wraps package manager CLIs behind a common interface. Part of 
 
 ## What it does
 
-Translates generic operations (install, add, remove, list, outdated, update, vendor) into the correct CLI commands for each package manager. Define what you want to do once, and the library figures out the right command for npm, bundler, cargo, go, or any other supported manager.
+Translates generic operations (install, add, remove, list, outdated, update, vendor, resolve) into the correct CLI commands for each package manager. Define what you want to do once, and the library figures out the right command for npm, bundler, cargo, go, or any other supported manager.
 
 ```go
 translator := managers.NewTranslator()
@@ -82,7 +82,7 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | helm | helm | Chart.lock |
 | brew | homebrew | - |
 
-Most managers support: install, add, remove, list, outdated, update. Some also support vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
+Most managers support: install, add, remove, list, outdated, update, resolve. Some also support vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
 
 ## Installation
 
@@ -218,6 +218,7 @@ Built-in policies include AllowAllPolicy, DenyAllPolicy, and PackageBlocklistPol
 | `update` | Update dependencies |
 | `path` | Get filesystem path to installed package |
 | `vendor` | Copy dependencies into the project directory |
+| `resolve` | Produce dependency graph output from the local CLI |
 
 ### Common flags
 
@@ -251,6 +252,18 @@ result, _ := manager.Vendor(ctx)
 ```
 
 **Managers with vendor support:** gomod, cargo, bundler, pip, rebar3
+
+### Resolving dependency graphs
+
+The `resolve` operation runs the package manager's dependency graph command and returns raw output. Some managers produce JSON (npm, cargo, pip), others produce text trees (go, maven, poetry). Parsing and normalization is left to the caller.
+
+```go
+manager, _ := managers.Detect("/path/to/project")
+result, _ := manager.Resolve(ctx)
+fmt.Println(result.Stdout) // raw CLI output (JSON tree, text tree, etc.)
+```
+
+**Managers with resolve support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, pip, uv, poetry, conda, composer, maven, gradle, lein, swift, deno, stack, pub, mix, rebar3, nuget, conan, helm
 
 ### Escape hatch
 

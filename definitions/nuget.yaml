@@ -79,6 +79,13 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [list, package]
+    default_flags: [--include-transitive]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -86,3 +93,4 @@ capabilities:
   - remove
   - list
   - outdated
+  - resolve

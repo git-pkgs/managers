@@ -362,6 +362,86 @@ func TestGenericManager_Vendor_NoCommand(t *testing.T) {
 	}
 }
 
+func TestGenericManager_Resolve(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "npm",
+		Binary: "npm",
+		Commands: map[string]definitions.Command{
+			"resolve": {
+				Base:         []string{"ls"},
+				DefaultFlags: []string{"--depth", "Infinity", "--json", "--long"},
+			},
+		},
+		Capabilities: []string{"resolve"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{
+		ExitCode: 0,
+		Stdout:   `{"dependencies": {}}`,
+	}}
+
+	mgr := newTestManager(def, runner)
+	result, err := mgr.Resolve(context.Background())
+	if err != nil {
+		t.Fatalf("Resolve failed: %v", err)
+	}
+
+	if result.ExitCode != 0 {
+		t.Errorf("got exit code %d, want 0", result.ExitCode)
+	}
+
+	if len(runner.Captured) != 1 {
+		t.Fatalf("expected 1 command, got %d", len(runner.Captured))
+	}
+	expected := []string{"npm", "ls", "--depth", "Infinity", "--json", "--long"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
+func TestGenericManager_Resolve_NoCommand(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "testpkg",
+		Binary: "testpkg",
+		Commands: map[string]definitions.Command{
+			"install": {
+				Base: []string{"install"},
+			},
+		},
+		Capabilities: []string{"install"},
+	}
+
+	runner := NewMockRunner()
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Resolve(context.Background())
+	if err == nil {
+		t.Error("expected error for missing resolve command, got nil")
+	}
+}
+
+func TestGenericManager_Resolve_RunnerError(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "gomod",
+		Binary: "go",
+		Commands: map[string]definitions.Command{
+			"resolve": {
+				Base: []string{"mod", "graph"},
+			},
+		},
+		Capabilities: []string{"resolve"},
+	}
+
+	runner := NewMockRunner()
+	runner.Errors = []error{errors.New("command not found")}
+
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Resolve(context.Background())
+	if err == nil {
+		t.Error("expected error, got nil")
+	}
+}
+
 func slicesEqual(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

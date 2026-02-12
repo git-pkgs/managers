@@ -70,6 +70,13 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [dependencies]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - list
+  - resolve

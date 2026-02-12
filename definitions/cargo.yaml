@@ -114,6 +114,13 @@ commands:
       extract_field: manifest_path
       strip_filename: true
 
+  resolve:
+    base: [metadata]
+    default_flags: [--format-version, "1"]
+    exit_codes:
+      0: success
+      1: error
+
   # cargo vendor copies crate sources into vendor/
   vendor:
     base: [vendor]
@@ -132,5 +139,6 @@ capabilities:
   - workspace
   - path
   - vendor
+  - resolve
   # No json_output for tree by default
   # No native outdated

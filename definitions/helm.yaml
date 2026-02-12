@@ -67,9 +67,16 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [dependency, list]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
   - remove
   - list
   - update
+  - resolve

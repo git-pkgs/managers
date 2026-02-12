@@ -83,6 +83,13 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [show]
+    default_flags: [--tree]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
@@ -93,3 +100,4 @@ capabilities:
   - outdated
   - json_output
   - path
+  - resolve

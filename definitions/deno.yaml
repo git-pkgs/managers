@@ -78,6 +78,13 @@ commands:
       type: line_prefix
       prefix: "local: "
 
+  resolve:
+    base: [info]
+    default_flags: [--json]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -87,3 +94,4 @@ capabilities:
   - outdated
   - update
   - path
+  - resolve

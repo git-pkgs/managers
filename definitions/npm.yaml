@@ -92,6 +92,13 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [ls]
+    default_flags: [--depth, Infinity, --json, --long]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - install_frozen
@@ -105,3 +112,4 @@ capabilities:
   - workspace
   - json_output
   - path
+  - resolve

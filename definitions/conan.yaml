@@ -75,6 +75,12 @@ commands:
       0: success
       1: error
 
+  resolve:
+    base: [info, .]
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - install
   - add
@@ -82,3 +88,4 @@ capabilities:
   - list
   - update
   - path
+  - resolve
