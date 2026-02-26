@@ -247,6 +247,36 @@ func (t *Translator) validate(validatorName, value string) error {
 	return nil
 }
 
+// ExitCodeMeaning returns the semantic meaning of an exit code for a
+// manager/operation pair, as defined in the YAML. Returns "" if the
+// manager, operation, or exit code is not defined.
+func (t *Translator) ExitCodeMeaning(managerName, operation string, exitCode int) string {
+	def, ok := t.definitions[managerName]
+	if !ok {
+		return ""
+	}
+	cmd, ok := def.Commands[operation]
+	if !ok {
+		return ""
+	}
+	return cmd.ExitCodes[exitCode]
+}
+
+// IsFatalExitCode reports whether exitCode represents a fatal error for
+// the given manager/operation. Exit code 0 is never fatal. For non-zero
+// codes, the result is fatal unless the YAML definition assigns a
+// non-"error" meaning.
+func (t *Translator) IsFatalExitCode(managerName, operation string, exitCode int) bool {
+	if exitCode == 0 {
+		return false
+	}
+	meaning := t.ExitCodeMeaning(managerName, operation, exitCode)
+	if meaning == "" || meaning == "error" {
+		return true
+	}
+	return false
+}
+
 func isTruthy(val any) bool {
 	if val == nil {
 		return false
