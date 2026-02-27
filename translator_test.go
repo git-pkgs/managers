@@ -3356,3 +3356,68 @@ func TestPipVendor(t *testing.T) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}
 }
+
+// --- ExitCodeMeaning tests ---
+
+func TestExitCodeMeaning(t *testing.T) {
+	tr := loadTranslator(t)
+
+	tests := []struct {
+		name      string
+		manager   string
+		operation string
+		exitCode  int
+		want      string
+	}{
+		{"npm resolve 0", "npm", "resolve", 0, "success"},
+		{"npm resolve 1 partial", "npm", "resolve", 1, "partial"},
+		{"npm install 0", "npm", "install", 0, "success"},
+		{"npm install 1 error", "npm", "install", 1, "error"},
+		{"npm outdated 1 outdated", "npm", "outdated", 1, "outdated"},
+		{"unknown manager", "nonexistent", "install", 1, ""},
+		{"unknown operation", "npm", "nonexistent", 1, ""},
+		{"undefined exit code", "npm", "install", 42, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tr.ExitCodeMeaning(tt.manager, tt.operation, tt.exitCode)
+			if got != tt.want {
+				t.Errorf("ExitCodeMeaning(%q, %q, %d) = %q, want %q",
+					tt.manager, tt.operation, tt.exitCode, got, tt.want)
+			}
+		})
+	}
+}
+
+// --- IsFatalExitCode tests ---
+
+func TestIsFatalExitCode(t *testing.T) {
+	tr := loadTranslator(t)
+
+	tests := []struct {
+		name      string
+		manager   string
+		operation string
+		exitCode  int
+		want      bool
+	}{
+		{"exit 0 never fatal", "npm", "install", 0, false},
+		{"npm install 1 is fatal", "npm", "install", 1, true},
+		{"npm resolve 1 not fatal", "npm", "resolve", 1, false},
+		{"npm outdated 1 not fatal", "npm", "outdated", 1, false},
+		{"unknown manager is fatal", "nonexistent", "install", 1, true},
+		{"unknown operation is fatal", "npm", "nonexistent", 1, true},
+		{"undefined exit code is fatal", "npm", "install", 42, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tr.IsFatalExitCode(tt.manager, tt.operation, tt.exitCode)
+			if got != tt.want {
+				t.Errorf("IsFatalExitCode(%q, %q, %d) = %v, want %v",
+					tt.manager, tt.operation, tt.exitCode, got, tt.want)
+			}
+		})
+	}
+}

@@ -97,7 +97,7 @@ commands:
     default_flags: [--depth, Infinity, --json, --long]
     exit_codes:
       0: success
-      1: error
+      1: partial
 
 capabilities:
   - install
