@@ -52,7 +52,7 @@ func (d *Detector) sortDefinitions() {
 
 func (d *Detector) Detect(dir string, opts DetectOptions) (Manager, error) {
 	if opts.Manager != "" {
-		return d.detectExplicit(dir, opts.Manager)
+		return d.detectExplicit(dir, opts.Manager, opts.RequireCLI)
 	}
 
 	files, err := os.ReadDir(dir)
@@ -100,10 +100,10 @@ func (d *Detector) Detect(dir string, opts DetectOptions) (Manager, error) {
 	return nil, ErrNoManifest{Dir: dir}
 }
 
-func (d *Detector) detectExplicit(dir, managerName string) (Manager, error) {
+func (d *Detector) detectExplicit(dir, managerName string, requireCLI bool) (Manager, error) {
 	for _, def := range d.definitions {
 		if def.Name == managerName {
-			return d.buildManager(def, dir, nil, true)
+			return d.buildManager(def, dir, nil, requireCLI)
 		}
 	}
 	return nil, ErrNoManifest{Dir: dir}
