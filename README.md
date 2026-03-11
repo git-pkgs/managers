@@ -79,6 +79,7 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | lein | clojars | - |
 | vcpkg | vcpkg | vcpkg.json |
 | conan | conan | conan.lock |
+| renv | cran | renv.lock |
 | helm | helm | Chart.lock |
 | brew | homebrew | - |
 
@@ -240,7 +241,7 @@ fmt.Println(result.Path) // "/path/to/project/node_modules/lodash"
 
 The library handles extracting clean paths from various output formats (JSON, line-based, regex patterns). For managers with predictable locations (yarn, mix, shards), paths are computed from templates.
 
-**Managers with path support:** npm, pnpm, yarn, bun, bundler, gem, pip, uv, poetry, conda, gomod, cargo, composer, brew, deno, nimble, opam, luarocks, conan, mix, shards, rebar3
+**Managers with path support:** npm, pnpm, yarn, bun, bundler, gem, pip, uv, poetry, conda, gomod, cargo, composer, brew, deno, nimble, opam, luarocks, conan, mix, shards, rebar3, renv
 
 ### Vendoring dependencies
 
@@ -263,7 +264,7 @@ result, _ := manager.Resolve(ctx)
 fmt.Println(result.Stdout) // raw CLI output (JSON tree, text tree, etc.)
 ```
 
-**Managers with resolve support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, pip, uv, poetry, conda, composer, maven, gradle, lein, swift, deno, stack, pub, mix, rebar3, nuget, conan, helm
+**Managers with resolve support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, pip, uv, poetry, conda, composer, maven, gradle, lein, swift, deno, stack, pub, mix, rebar3, nuget, conan, helm, renv
 
 ### Escape hatch
 
