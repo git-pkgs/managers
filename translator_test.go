@@ -2983,6 +2983,175 @@ func TestCpanmUpdate(t *testing.T) {
 	}
 }
 
+// --- renv tests ---
+
+func TestRenvInstall(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "install", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "renv::restore()"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvAdd(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "add", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "renv::install(commandArgs(TRUE))", "dplyr"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvAddChain(t *testing.T) {
+	tr := loadTranslator(t)
+	cmds, err := tr.BuildCommands("renv", "add", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommands failed: %v", err)
+	}
+	if len(cmds) != 2 {
+		t.Fatalf("expected 2 commands, got %d", len(cmds))
+	}
+	expected1 := []string{"Rscript", "-e", "renv::install(commandArgs(TRUE))", "dplyr"}
+	expected2 := []string{"Rscript", "-e", "renv::snapshot()"}
+	if !reflect.DeepEqual(cmds[0], expected1) {
+		t.Errorf("cmd[0]: got %v, want %v", cmds[0], expected1)
+	}
+	if !reflect.DeepEqual(cmds[1], expected2) {
+		t.Errorf("cmd[1]: got %v, want %v", cmds[1], expected2)
+	}
+}
+
+func TestRenvRemove(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "remove", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "renv::remove(commandArgs(TRUE))", "dplyr"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvRemoveChain(t *testing.T) {
+	tr := loadTranslator(t)
+	cmds, err := tr.BuildCommands("renv", "remove", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommands failed: %v", err)
+	}
+	if len(cmds) != 2 {
+		t.Fatalf("expected 2 commands, got %d", len(cmds))
+	}
+	expected1 := []string{"Rscript", "-e", "renv::remove(commandArgs(TRUE))", "dplyr"}
+	expected2 := []string{"Rscript", "-e", "renv::snapshot()"}
+	if !reflect.DeepEqual(cmds[0], expected1) {
+		t.Errorf("cmd[0]: got %v, want %v", cmds[0], expected1)
+	}
+	if !reflect.DeepEqual(cmds[1], expected2) {
+		t.Errorf("cmd[1]: got %v, want %v", cmds[1], expected2)
+	}
+}
+
+func TestRenvList(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "list", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "cat(readLines('renv.lock'), sep='\\n')"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvOutdated(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "outdated", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "renv::status()"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvUpdate(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "update", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "renv::update(commandArgs(TRUE))", "dplyr"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvUpdateChain(t *testing.T) {
+	tr := loadTranslator(t)
+	cmds, err := tr.BuildCommands("renv", "update", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommands failed: %v", err)
+	}
+	if len(cmds) != 2 {
+		t.Fatalf("expected 2 commands, got %d", len(cmds))
+	}
+	expected1 := []string{"Rscript", "-e", "renv::update(commandArgs(TRUE))", "dplyr"}
+	expected2 := []string{"Rscript", "-e", "renv::snapshot()"}
+	if !reflect.DeepEqual(cmds[0], expected1) {
+		t.Errorf("cmd[0]: got %v, want %v", cmds[0], expected1)
+	}
+	if !reflect.DeepEqual(cmds[1], expected2) {
+		t.Errorf("cmd[1]: got %v, want %v", cmds[1], expected2)
+	}
+}
+
+func TestRenvPath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "path", CommandInput{
+		Args: map[string]string{"package": "dplyr"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "cat(find.package(commandArgs(TRUE)))", "dplyr"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestRenvResolve(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("renv", "resolve", CommandInput{})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"Rscript", "-e", "renv::dependencies()"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
 // --- path command tests ---
 
 func TestNpmPath(t *testing.T) {

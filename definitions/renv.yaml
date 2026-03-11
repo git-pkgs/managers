@@ -1,0 +1,100 @@
+# renv - R dependency management
+# https://rstudio.github.io/renv/
+#
+# renv has no standalone CLI. All operations go through Rscript -e
+# with R expressions. Package arguments are passed as trailing args
+# and picked up via commandArgs(TRUE) inside the R expression.
+
+name: renv
+ecosystem: cran
+binary: Rscript
+version: ">=1.0.0"
+
+detection:
+  lockfiles:
+    - renv.lock
+  manifests:
+    - DESCRIPTION
+  file_checks:
+    - file: .Rprofile
+      match: 'renv/activate'
+  priority: 10
+
+version_detection:
+  command: [-e, "cat(as.character(utils::packageVersion('renv')))"]
+  pattern: '(\d+\.\d+\.\d+)'
+
+commands:
+  install:
+    base: [-e, "renv::restore()"]
+    flags:
+      clean: [--vanilla]
+    exit_codes:
+      0: success
+      1: error
+
+  add:
+    base: [-e, "renv::install(commandArgs(TRUE))"]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    then:
+      - base: [-e, "renv::snapshot()"]
+
+  remove:
+    base: [-e, "renv::remove(commandArgs(TRUE))"]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+    then:
+      - base: [-e, "renv::snapshot()"]
+
+  list:
+    base: [-e, "cat(readLines('renv.lock'), sep='\\n')"]
+    exit_codes:
+      0: success
+      1: error
+
+  outdated:
+    base: [-e, "renv::status()"]
+    exit_codes:
+      0: success
+      1: error
+
+  update:
+    base: [-e, "renv::update(commandArgs(TRUE))"]
+    args:
+      package: {position: 0, required: false}
+    exit_codes:
+      0: success
+      1: error
+    then:
+      - base: [-e, "renv::snapshot()"]
+
+  path:
+    base: [-e, "cat(find.package(commandArgs(TRUE)))"]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
+  resolve:
+    base: [-e, "renv::dependencies()"]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - install
+  - add
+  - remove
+  - list
+  - outdated
+  - update
+  - path
+  - resolve
