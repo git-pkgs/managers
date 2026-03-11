@@ -1,0 +1,25 @@
+definitions/renv.yaml
+  edbdc9ed23054cba 1-100
+translator_test.go
+  edbdc9ed23054cba 2986-3150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "e54c3b0058b20b074bd5a2fb58ede99158f9113a",
+  "prompts": {
+    "edbdc9ed23054cba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52f9f145-6c2e-41b3-b12d-3243abf75efe",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Andrew Nesbitt <andrewnez@gmail.com>",
+      "messages": [],
+      "total_additions": 269,
+      "total_deletions": 0,
+      "accepted_lines": 269,
+      "overriden_lines": 0
+    }
+  }
+}
