@@ -14,14 +14,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/git-pkgs/managers"
 	"github.com/git-pkgs/managers/definitions"
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	const minArgs = 2
+	if len(os.Args) < minArgs {
 		fmt.Fprintf(os.Stderr, "Usage: %s <repo-path>\n", os.Args[0])
 		os.Exit(1)
 	}
@@ -127,8 +127,8 @@ func applyUpdate(ctx context.Context, tr *managers.Translator, manager, repoPath
 }
 
 // runCommand executes a command in the specified directory
-func runCommand(ctx context.Context, args []string, dir string) error {
-	_, cancel := context.WithTimeout(ctx, 5*time.Minute)
+func runCommand(ctx context.Context, args []string, _ string) error {
+	_, cancel := context.WithTimeout(ctx, commandTimeout)
 	defer cancel()
 
 	// In a real implementation, use os/exec
@@ -142,7 +142,7 @@ func runCommand(ctx context.Context, args []string, dir string) error {
 // 1. Import and call git-pkgs/cmd.runOutdated directly
 // 2. Execute `git-pkgs outdated --json` and parse output
 // 3. Use the same ecosyste.ms client that git-pkgs uses
-func getOutdatedFromGitPkgs(repoPath string) []OutdatedPackage {
+func getOutdatedFromGitPkgs(_ string) []OutdatedPackage {
 	// Simulated data - in practice this comes from git-pkgs
 	return []OutdatedPackage{
 		{

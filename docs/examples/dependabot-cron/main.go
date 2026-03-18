@@ -28,7 +28,8 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	const minArgs = 2
+	if len(os.Args) < minArgs {
 		fmt.Fprintf(os.Stderr, "Usage: %s <repo-path>\n", os.Args[0])
 		os.Exit(1)
 	}
@@ -269,8 +270,10 @@ type CommandResult struct {
 }
 
 // runCommand executes a command and returns the result
+const commandTimeout = 5 * time.Minute
+
 func runCommand(ctx context.Context, args []string, dir string) (*CommandResult, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, commandTimeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
