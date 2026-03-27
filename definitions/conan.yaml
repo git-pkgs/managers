@@ -16,6 +16,12 @@ version_detection:
   pattern: 'Conan version (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [new, resolve-tmp, -d, basic]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install, .]
     flags:
@@ -82,6 +88,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - remove

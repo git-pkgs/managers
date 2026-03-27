@@ -16,6 +16,12 @@ version_detection:
   pattern: 'cabal-install version (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [init, -n, -p, resolve-tmp]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [build, --only-dependencies]
     flags:
@@ -63,6 +69,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - list
   - outdated

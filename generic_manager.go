@@ -30,6 +30,20 @@ func (m *GenericManager) Warnings() []string {
 	return m.warnings
 }
 
+func (m *GenericManager) Init(ctx context.Context) (*Result, error) {
+	input := CommandInput{
+		Args:  map[string]string{},
+		Flags: map[string]any{},
+	}
+
+	cmd, err := m.translator.BuildCommand(m.def.Name, "init", input)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.runner.Run(ctx, m.dir, cmd...)
+}
+
 func (m *GenericManager) Install(ctx context.Context, opts InstallOptions) (*Result, error) {
 	input := CommandInput{
 		Args: map[string]string{},
@@ -59,6 +73,10 @@ func (m *GenericManager) Add(ctx context.Context, pkg string, opts AddOptions) (
 			"exact":     opts.Exact,
 			"workspace": opts.Workspace,
 		},
+	}
+
+	if opts.Version != "" {
+		input.Args["version"] = opts.Version
 	}
 
 	cmd, err := m.translator.BuildCommand(m.def.Name, "add", input)

@@ -17,6 +17,12 @@ detection:
   priority: 10
 
 commands:
+  init:
+    base: [init]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install]
     flags:

@@ -16,6 +16,12 @@ version_detection:
   pattern: 'conda (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [create, -n, resolve-tmp, --yes]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install, --yes]
     base_overrides:
@@ -96,6 +102,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - install_frozen
   - add

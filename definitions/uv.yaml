@@ -21,6 +21,12 @@ version_detection:
   pattern: 'uv (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [init]
+    exit_codes:
+      0: success
+      1: error
+
   # uv sync installs from lockfile
   install:
     base: [sync]
@@ -127,6 +133,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - install_frozen
   - add

@@ -15,6 +15,12 @@ version_detection:
   pattern: 'v(\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [create, resolve-tmp]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [dependency, build]
     flags:
@@ -74,6 +80,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - remove

@@ -14,6 +14,12 @@ version_detection:
   pattern: 'Leiningen (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [new, resolve-tmp]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [deps]
     exit_codes:
@@ -67,6 +73,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - list
   - resolve

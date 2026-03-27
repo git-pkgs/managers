@@ -17,6 +17,12 @@ detection:
   priority: 10
 
 commands:
+  init:
+    base: [new, resolve_tmp]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [deps.get]
     flags:
@@ -86,6 +92,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - install_frozen
   - list

@@ -15,6 +15,12 @@ version_detection:
   pattern: 'vcpkg package management program version (\d{4}-\d{2}-\d{2})'
 
 commands:
+  init:
+    base: [new, --application]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install]
     flags:
@@ -68,6 +74,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - remove

@@ -9,6 +9,7 @@ type Manager interface {
 	Name() string
 	Ecosystem() string
 
+	Init(ctx context.Context) (*Result, error)
 	Install(ctx context.Context, opts InstallOptions) (*Result, error)
 	Add(ctx context.Context, pkg string, opts AddOptions) (*Result, error)
 	Remove(ctx context.Context, pkg string) (*Result, error)
@@ -30,6 +31,7 @@ type InstallOptions struct {
 }
 
 type AddOptions struct {
+	Version   string
 	Dev       bool
 	Optional  bool
 	Exact     bool
@@ -66,7 +68,8 @@ const (
 type Capability int
 
 const (
-	CapInstall Capability = iota
+	CapInit Capability = iota
+	CapInstall
 	CapInstallFrozen
 	CapInstallClean
 	CapAdd
@@ -87,6 +90,7 @@ const (
 )
 
 var capabilityNames = map[Capability]string{
+	CapInit:          "init",
 	CapInstall:       "install",
 	CapInstallFrozen: "install_frozen",
 	CapInstallClean:  "install_clean",

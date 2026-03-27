@@ -16,6 +16,12 @@ version_detection:
   pattern: '(\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [init, -n, --bare]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install, --deps-only, .]
     flags:
@@ -79,6 +85,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - remove
