@@ -1,0 +1,100 @@
+definitions/conda.yaml
+  5e8b61bc86db520c 19-24
+definitions/pnpm.yaml
+  5e8b61bc86db520c 21-26,127
+definitions/nimble.yaml
+  5e8b61bc86db520c 18-23
+definitions/pub.yaml
+  5e8b61bc86db520c 20-25
+definitions/bundler.yaml
+  5e8b61bc86db520c 21-26,134
+definitions/conan.yaml
+  5e8b61bc86db520c 19-24
+definitions/renv.yaml
+  5e8b61bc86db520c 28-33
+definitions/nuget.yaml
+  5e8b61bc86db520c 20-25
+definitions/bun.yaml
+  5e8b61bc86db520c 21-26,101
+definitions/swift.yaml
+  5e8b61bc86db520c 18-23,86
+definitions/cargo.yaml
+  5e8b61bc86db520c 21-26,138
+definitions/gradle.yaml
+  5e8b61bc86db520c 19-24
+definitions/cocoapods.yaml
+  5e8b61bc86db520c 20-25
+definitions/luarocks.yaml
+  5e8b61bc86db520c 17-22
+definitions/poetry.yaml
+  5e8b61bc86db520c 23-28,103
+definitions/yarn.yaml
+  5e8b61bc86db520c 27-32,133
+definitions/gomod.yaml
+  5e8b61bc86db520c 21-26,133
+definitions/lein.yaml
+  5e8b61bc86db520c 17-22
+definitions/shards.yaml
+  5e8b61bc86db520c 18-23
+manager.go
+  5e8b61bc86db520c 12,34,71-72,93
+definitions/mix.yaml
+  5e8b61bc86db520c 20-25
+definitions/stack.yaml
+  5e8b61bc86db520c 19-24
+definitions/opam.yaml
+  5e8b61bc86db520c 19-24
+definitions/composer.yaml
+  5e8b61bc86db520c 20-26
+generic_manager.go
+  5e8b61bc86db520c 33-46,78-81
+definitions/helm.yaml
+  5e8b61bc86db520c 18-23
+definitions/cabal.yaml
+  5e8b61bc86db520c 19-24
+definitions/uv.yaml
+  5e8b61bc86db520c 24-29,136
+definitions/deno.yaml
+  5e8b61bc86db520c 19-24,95
+definitions/rebar3.yaml
+  5e8b61bc86db520c 18-23
+definitions/vcpkg.yaml
+  5e8b61bc86db520c 18-23
+definitions/npm.yaml
+  5e8b61bc86db520c 22-27,109
+README.md
+  5e8b61bc86db520c 7,86,214,233-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.20",
+  "base_commit_sha": "3ae446558edc72ed275744e6060e546c7cc3a771",
+  "prompts": {
+    "5e8b61bc86db520c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4bbc4f3b-3965-4ca9-8b26-a0385d677297",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Andrew Nesbitt <andrewnez@gmail.com>",
+      "messages": [],
+      "total_additions": 230,
+      "total_deletions": 3,
+      "accepted_lines": 230,
+      "overriden_lines": 0
+    },
+    "edbdc9ed23054cba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "52f9f145-6c2e-41b3-b12d-3243abf75efe",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Andrew Nesbitt <andrewnez@gmail.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 2,
+      "accepted_lines": 103,
+      "overriden_lines": 0
+    }
+  }
+}
