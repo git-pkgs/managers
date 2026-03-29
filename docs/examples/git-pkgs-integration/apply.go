@@ -19,6 +19,8 @@ import (
 	"github.com/git-pkgs/managers/definitions"
 )
 
+const ecosystemNPM = "npm"
+
 // ApplyOptions configures the apply command
 type ApplyOptions struct {
 	RepoPath   string
@@ -183,12 +185,12 @@ func ecosystemToManagerWithFallback(ecosystem, detected string) string {
 	eco := strings.ToLower(ecosystem)
 
 	// For npm ecosystem, use detected manager (npm/pnpm/yarn)
-	if eco == "npm" {
+	if eco == ecosystemNPM {
 		switch detected {
 		case "npm", "pnpm", "yarn":
 			return detected
 		}
-		return "npm"
+		return ecosystemNPM
 	}
 
 	// Direct mappings
@@ -236,8 +238,10 @@ func getGitPkgsOutdated(repoPath, updateType string) ([]OutdatedPackage, error) 
 	return result, nil
 }
 
+const commandTimeout = 5 * time.Minute
+
 func executeCommand(ctx context.Context, args []string, dir string) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, commandTimeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)

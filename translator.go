@@ -89,9 +89,41 @@ func (t *Translator) buildCommandChain(binary string, cmd definitions.Command, i
 func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, input CommandInput) ([]string, error) {
 	args := []string{binary}
 
-	// Check for base overrides (e.g., frozen flag changes "install" to "ci" for npm)
-	baseOverrideUsed := ""
+	baseOverrideUsed := t.applyBaseOverrides(&args, cmd, input)
+
+	packageVal := input.Args["package"]
+
+	sortedArgs := t.sortArgs(cmd)
+
+	for _, entry := range sortedArgs {
+		val, err := t.processArg(entry.name, entry.argDef, input, &args)
+		if err != nil {
+			return nil, err
+		}
+		if val == "" {
+			continue
+		}
+	}
+
+	t.applyVersionSuffix(&args, cmd, input, packageVal)
+
+	args = append(args, cmd.DefaultFlags...)
+
+	t.applyUserFlags(&args, cmd, input, baseOverrideUsed)
+
+	args = append(args, input.Extra...)
+
+	return args, nil
+}
+
+type argEntry struct {
+	name   string
+	argDef definitions.Arg
+}
+
+func (t *Translator) applyBaseOverrides(args *[]string, cmd definitions.Command, input CommandInput) string {
 	base := cmd.Base
+	baseOverrideUsed := ""
 	for flagName, override := range cmd.BaseOverrides {
 		if val, ok := input.Flags[flagName]; ok && isTruthy(val) {
 			base = override
@@ -99,128 +131,106 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 			break
 		}
 	}
-	args = append(args, base...)
+	*args = append(*args, base...)
+	return baseOverrideUsed
+}
 
-	// Process args in a deterministic order by position
-	// First handle package, then version (for suffix handling)
-	packageVal := ""
-	if val, ok := input.Args["package"]; ok {
-		packageVal = val
-	}
-
-	// Sort args by position to ensure deterministic order
-	// Flag-style args (with argDef.Flag set) should come after positional args
-	type argEntry struct {
-		name   string
-		argDef definitions.Arg
-	}
-	var sortedArgs []argEntry
+func (t *Translator) sortArgs(cmd definitions.Command) []argEntry {
+	var sorted []argEntry
 	for name, argDef := range cmd.Args {
-		sortedArgs = append(sortedArgs, argEntry{name, argDef})
+		sorted = append(sorted, argEntry{name, argDef})
 	}
-	sort.Slice(sortedArgs, func(i, j int) bool {
-		// Flag-style args come after positional args
-		iIsFlag := sortedArgs[i].argDef.Flag != ""
-		jIsFlag := sortedArgs[j].argDef.Flag != ""
+	sort.Slice(sorted, func(i, j int) bool {
+		iIsFlag := sorted[i].argDef.Flag != ""
+		jIsFlag := sorted[j].argDef.Flag != ""
 		if iIsFlag != jIsFlag {
-			return !iIsFlag // positional args (non-flag) come first
+			return !iIsFlag
 		}
-		// Within same category, sort by position
-		return sortedArgs[i].argDef.Position < sortedArgs[j].argDef.Position
+		return sorted[i].argDef.Position < sorted[j].argDef.Position
 	})
+	return sorted
+}
 
-	for _, entry := range sortedArgs {
-		name := entry.name
-		argDef := entry.argDef
-		val, provided := input.Args[name]
-		if !provided {
-			if argDef.Required && !argDef.ExtractionOnly {
-				return nil, ErrMissingArgument{Argument: name}
-			}
-			continue
+func (t *Translator) processArg(name string, argDef definitions.Arg, input CommandInput, args *[]string) (string, error) {
+	val, provided := input.Args[name]
+	if !provided {
+		if argDef.Required && !argDef.ExtractionOnly {
+			return "", ErrMissingArgument{Argument: name}
 		}
+		return "", nil
+	}
 
-		// Skip extraction-only args - they're used for output parsing, not command building
-		if argDef.ExtractionOnly {
-			continue
-		}
+	if argDef.ExtractionOnly {
+		return "", nil
+	}
 
-		if argDef.Validate != "" {
-			if err := t.validate(argDef.Validate, val); err != nil {
-				return nil, err
-			}
-		}
-
-		if argDef.Flag != "" {
-			// Flag-style arg: --version "1.0"
-			args = append(args, argDef.Flag, val)
-		} else if argDef.FixedSuffix != "" {
-			// Fixed suffix: package@none
-			args = append(args, val+argDef.FixedSuffix)
-		} else if argDef.Suffix != "" && name == "version" {
-			// Version suffix: find package arg and append @version
-			// Skip here, handled below
-			continue
-		} else {
-			args = append(args, val)
+	if argDef.Validate != "" {
+		if err := t.validate(argDef.Validate, val); err != nil {
+			return "", err
 		}
 	}
 
-	// Handle version suffix (append to package)
-	if versionDef, hasVersion := cmd.Args["version"]; hasVersion && versionDef.Suffix != "" {
-		if version, hasVersionVal := input.Args["version"]; hasVersionVal {
-			// Find and update the package arg
-			for i, a := range args {
-				if a == packageVal {
-					args[i] = a + versionDef.Suffix + version
-					break
-				}
-			}
-		}
+	switch {
+	case argDef.Flag != "":
+		*args = append(*args, argDef.Flag, val)
+	case argDef.FixedSuffix != "":
+		*args = append(*args, val+argDef.FixedSuffix)
+	case argDef.Suffix != "" && name == "version":
+		// Handled in applyVersionSuffix
+	default:
+		*args = append(*args, val)
 	}
 
-	// Add default flags
-	args = append(args, cmd.DefaultFlags...)
+	return val, nil
+}
 
-	// Add user-specified flags
+func (t *Translator) applyVersionSuffix(args *[]string, cmd definitions.Command, input CommandInput, packageVal string) {
+	versionDef, hasVersion := cmd.Args["version"]
+	if !hasVersion || versionDef.Suffix == "" {
+		return
+	}
+	version, hasVersionVal := input.Args["version"]
+	if !hasVersionVal {
+		return
+	}
+	for i, a := range *args {
+		if a == packageVal {
+			(*args)[i] = a + versionDef.Suffix + version
+			break
+		}
+	}
+}
+
+func (t *Translator) applyUserFlags(args *[]string, cmd definitions.Command, input CommandInput, baseOverrideUsed string) {
 	for name, val := range input.Flags {
 		if val == false || val == "" || val == nil {
 			continue
 		}
-
-		// Skip flag if it was used for base override
 		if name == baseOverrideUsed {
 			continue
 		}
-
 		flagDef, ok := cmd.Flags[name]
 		if !ok {
 			continue
 		}
-
 		expanded := t.expandFlag(flagDef, input.Flags)
-		args = append(args, expanded...)
+		*args = append(*args, expanded...)
 	}
-
-	// Append any extra raw arguments (escape hatch for manager-specific flags)
-	args = append(args, input.Extra...)
-
-	return args, nil
 }
 
 func (t *Translator) expandFlag(flag definitions.Flag, flags map[string]any) []string {
 	var result []string
 	for _, v := range flag.Values {
-		if v.Literal != "" && v.Field != "" && v.Join != "" {
-			// Joined flag: --group=development
+		switch {
+		case v.Literal != "" && v.Field != "" && v.Join != "":
 			if val, ok := flags[v.Field]; ok {
 				if s, ok := val.(string); ok && s != "" {
 					result = append(result, v.Literal+v.Join+s)
 				}
 			}
-		} else if v.Literal != "" {
+		case v.Literal != "":
 			result = append(result, v.Literal)
-		} else if v.Field != "" {
+		case v.Field != "":
 			if val, ok := flags[v.Field]; ok {
 				if s, ok := val.(string); ok && s != "" {
 					result = append(result, s)

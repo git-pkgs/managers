@@ -50,7 +50,7 @@ func (d *Detector) sortDefinitions() {
 	})
 }
 
-func (d *Detector) Detect(dir string, opts DetectOptions) (Manager, error) {
+func (d *Detector) Detect(dir string, opts DetectOptions) (Manager, error) { //nolint:ireturn
 	if opts.Manager != "" {
 		return d.detectExplicit(dir, opts.Manager, opts.RequireCLI)
 	}
@@ -100,7 +100,7 @@ func (d *Detector) Detect(dir string, opts DetectOptions) (Manager, error) {
 	return nil, ErrNoManifest{Dir: dir}
 }
 
-func (d *Detector) detectExplicit(dir, managerName string, requireCLI bool) (Manager, error) {
+func (d *Detector) detectExplicit(dir, managerName string, requireCLI bool) (Manager, error) { //nolint:ireturn
 	for _, def := range d.definitions {
 		if def.Name == managerName {
 			return d.buildManager(def, dir, nil, requireCLI)
@@ -109,7 +109,7 @@ func (d *Detector) detectExplicit(dir, managerName string, requireCLI bool) (Man
 	return nil, ErrNoManifest{Dir: dir}
 }
 
-func (d *Detector) buildManager(def *definitions.Definition, dir string, files []string, requireCLI bool) (Manager, error) {
+func (d *Detector) buildManager(def *definitions.Definition, dir string, files []string, requireCLI bool) (Manager, error) { //nolint:ireturn
 	if requireCLI {
 		if _, err := exec.LookPath(def.Binary); err != nil {
 			return nil, ErrCLINotFound{

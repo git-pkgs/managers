@@ -13,12 +13,19 @@ var defaultValidators = map[string]*regexp.Regexp{
 	"maven_artifact": regexp.MustCompile(`^[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+$`),
 }
 
+const (
+	maxLenDefault = 214
+	maxLenGem     = 128
+	maxLenCrate   = 64
+	maxLenModule  = 256
+)
+
 var maxLengths = map[string]int{
-	"package_name": 214,
-	"npm_package":  214,
-	"gem_name":     128,
-	"cargo_crate":  64,
-	"go_module":    256,
+	"package_name": maxLenDefault,
+	"npm_package":  maxLenDefault,
+	"gem_name":     maxLenGem,
+	"cargo_crate":  maxLenCrate,
+	"go_module":    maxLenModule,
 }
 
 func ValidatePackageName(validatorName, name string) error {

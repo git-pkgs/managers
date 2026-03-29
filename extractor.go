@@ -92,8 +92,9 @@ func extractRegex(output string, pattern string) (string, error) {
 		return "", fmt.Errorf("invalid regex pattern: %w", err)
 	}
 
+	const minSubmatchLen = 2
 	matches := re.FindStringSubmatch(output)
-	if len(matches) < 2 {
+	if len(matches) < minSubmatchLen {
 		return "", fmt.Errorf("pattern did not match or no capture group found")
 	}
 
