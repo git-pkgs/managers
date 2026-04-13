@@ -31,6 +31,7 @@ type InstallOptions struct {
 }
 
 type AddOptions struct {
+	Version   string
 	Dev       bool
 	Optional  bool
 	Exact     bool

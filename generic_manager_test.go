@@ -522,6 +522,69 @@ func TestGenericManager_Init_RunnerError(t *testing.T) {
 	}
 }
 
+func TestGenericManager_Add_WithVersion(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "npm",
+		Binary: "npm",
+		Commands: map[string]definitions.Command{
+			"add": {
+				Base: []string{"install"},
+				Args: map[string]definitions.Arg{
+					"package": {Position: 0, Required: true},
+					"version": {Position: 0, Suffix: "@", Required: false},
+				},
+			},
+		},
+		Capabilities: []string{"add"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{ExitCode: 0}}
+
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Add(context.Background(), "lodash", AddOptions{Version: "4.17.21"})
+	if err != nil {
+		t.Fatalf("Add failed: %v", err)
+	}
+
+	expected := []string{"npm", "install", "lodash@4.17.21"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
+func TestGenericManager_Add_WithoutVersion(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "npm",
+		Binary: "npm",
+		Commands: map[string]definitions.Command{
+			"add": {
+				Base: []string{"install"},
+				Args: map[string]definitions.Arg{
+					"package": {Position: 0, Required: true},
+					"version": {Position: 0, Suffix: "@", Required: false},
+				},
+			},
+		},
+		Capabilities: []string{"add"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{ExitCode: 0}}
+
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Add(context.Background(), "lodash", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add failed: %v", err)
+	}
+
+	// Empty version should not produce a trailing @
+	expected := []string{"npm", "install", "lodash"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
 // TestCapabilityOrdering pins the integer values of public Capability constants.
 // Inserting a new constant mid-block silently shifts everything after it; this
 // test will fail loudly if that happens. New capabilities go at the end.
