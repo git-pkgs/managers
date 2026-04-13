@@ -18,7 +18,7 @@ version_detection:
 
 commands:
   init:
-    base: [new, classlib, -n, ResolveTmp]
+    base: [new, classlib]
     exit_codes:
       0: success
       1: error

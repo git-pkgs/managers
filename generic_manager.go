@@ -75,10 +75,6 @@ func (m *GenericManager) Add(ctx context.Context, pkg string, opts AddOptions) (
 		},
 	}
 
-	if opts.Version != "" {
-		input.Args["version"] = opts.Version
-	}
-
 	cmd, err := m.translator.BuildCommand(m.def.Name, "add", input)
 	if err != nil {
 		return nil, err

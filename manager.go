@@ -31,7 +31,6 @@ type InstallOptions struct {
 }
 
 type AddOptions struct {
-	Version   string
 	Dev       bool
 	Optional  bool
 	Exact     bool
@@ -53,7 +52,7 @@ func (r *Result) Success() bool {
 }
 
 type PathResult struct {
-	Path   string // extracted path to the package
+	Path   string  // extracted path to the package
 	Result *Result // underlying command result
 }
 
@@ -68,8 +67,7 @@ const (
 type Capability int
 
 const (
-	CapInit Capability = iota
-	CapInstall
+	CapInstall Capability = iota
 	CapInstallFrozen
 	CapInstallClean
 	CapAdd
@@ -87,6 +85,7 @@ const (
 	CapPath
 	CapVendor
 	CapResolve
+	CapInit
 )
 
 var capabilityNames = map[Capability]string{

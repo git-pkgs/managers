@@ -83,7 +83,7 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | helm | helm | Chart.lock |
 | brew | homebrew | - |
 
-Most managers support: init, install, add, remove, list, outdated, update, resolve. Some also support vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations. A few global installers (brew, gem, cpanm) and managers with interactive-only init (maven, pip, sbt) do not have init support.
+Most managers support: install, add, remove, list, outdated, update, resolve. Some also support init, vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
 
 ## Installation
 
@@ -232,7 +232,7 @@ Built-in policies include AllowAllPolicy, DenyAllPolicy, and PackageBlocklistPol
 
 ### Initializing projects
 
-The `init` operation creates a new project with the package manager's default manifest file. This is useful for creating temporary projects for dependency resolution or scaffolding new projects.
+The `init` operation creates a new project manifest in the current directory. This is useful for creating temporary projects for dependency resolution or scaffolding new projects.
 
 ```go
 manager, _ := managers.Detect("/path/to/empty/dir")
@@ -240,7 +240,9 @@ result, _ := manager.Init(ctx)
 // Creates package.json (npm), Gemfile (bundler), Cargo.toml (cargo), etc.
 ```
 
-**Managers with init support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, uv, poetry, deno, composer, swift, pub, mix, nuget, gradle, helm, conan, conda, stack, lein, rebar3, cabal, cocoapods, nimble, opam, luarocks, shards, vcpkg, renv
+Only managers that can scaffold in-place are supported. Managers whose `new` command always creates a child directory (mix, lein, helm, stack, pub, rebar3) or whose `init` command bootstraps global state rather than a project (opam) are excluded.
+
+**Managers with init support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, uv, poetry, deno, composer, swift, nuget, gradle, conan, conda, cabal, nimble, luarocks, shards, vcpkg, renv
 
 ### Getting package paths
 
