@@ -99,15 +99,15 @@ func run(ctx context.Context, repoPath string) error {
 // git-pkgs uses ecosyste.ms ecosystem names, which may differ from our manager names
 func ecosystemToManager(ecosystem string) string {
 	mapping := map[string]string{
-		"npm":       "npm",      // or could be pnpm/yarn based on lockfile
+		"npm":       "npm", // or could be pnpm/yarn based on lockfile
 		"rubygems":  "bundler",
 		"cargo":     "cargo",
 		"go":        "gomod",
-		"pypi":      "uv",       // or pip, depending on project
-		"packagist": "",        // not yet supported
-		"nuget":     "",        // not yet supported
-		"maven":     "",        // not yet supported
-		"hex":       "",        // not yet supported
+		"pypi":      "uv", // or pip, depending on project
+		"packagist": "",   // not yet supported
+		"nuget":     "",   // not yet supported
+		"maven":     "",   // not yet supported
+		"hex":       "",   // not yet supported
 	}
 	return mapping[strings.ToLower(ecosystem)]
 }

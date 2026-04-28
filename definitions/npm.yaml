@@ -19,6 +19,12 @@ version_detection:
   pattern: '(\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [init, -y]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install]
     base_overrides:
@@ -100,6 +106,7 @@ commands:
       1: partial
 
 capabilities:
+  - init
   - install
   - install_frozen
   - add

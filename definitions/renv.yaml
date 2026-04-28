@@ -25,6 +25,12 @@ version_detection:
   pattern: '(\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [-e, "renv::init(bare = TRUE)"]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [-e, "renv::restore()"]
     flags:
@@ -90,6 +96,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - remove

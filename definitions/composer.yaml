@@ -17,6 +17,13 @@ detection:
   priority: 10
 
 commands:
+  init:
+    base: [init, -n]
+    default_flags: [--name, resolve/tmp]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install]
     flags:
@@ -91,6 +98,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - add_dev

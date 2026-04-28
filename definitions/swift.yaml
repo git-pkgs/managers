@@ -15,6 +15,12 @@ version_detection:
   pattern: 'Swift version (\d+\.\d+(?:\.\d+)?)'
 
 commands:
+  init:
+    base: [package, init, --type, library]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [package, resolve]
     flags:
@@ -77,6 +83,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - add
   - list

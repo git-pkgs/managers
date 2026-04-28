@@ -442,6 +442,184 @@ func TestGenericManager_Resolve_RunnerError(t *testing.T) {
 	}
 }
 
+//nolint:dupl // structurally mirrors TestGenericManager_Vendor by design
+func TestGenericManager_Init(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "npm",
+		Binary: "npm",
+		Commands: map[string]definitions.Command{
+			"init": {
+				Base: []string{"init", "-y"},
+			},
+		},
+		Capabilities: []string{"init"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{
+		ExitCode: 0,
+		Stdout:   "Wrote to /test/project/package.json",
+	}}
+
+	mgr := newTestManager(def, runner)
+	result, err := mgr.Init(context.Background())
+	if err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	if result.ExitCode != 0 {
+		t.Errorf("got exit code %d, want 0", result.ExitCode)
+	}
+
+	if len(runner.Captured) != 1 {
+		t.Fatalf("expected 1 command, got %d", len(runner.Captured))
+	}
+	expected := []string{"npm", "init", "-y"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
+func TestGenericManager_Init_NoCommand(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "testpkg",
+		Binary: "testpkg",
+		Commands: map[string]definitions.Command{
+			"install": {
+				Base: []string{"install"},
+			},
+		},
+		Capabilities: []string{"install"},
+	}
+
+	runner := NewMockRunner()
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Init(context.Background())
+	if err == nil {
+		t.Error("expected error for missing init command, got nil")
+	}
+}
+
+func TestGenericManager_Init_RunnerError(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "cargo",
+		Binary: "cargo",
+		Commands: map[string]definitions.Command{
+			"init": {
+				Base: []string{"init", "--lib"},
+			},
+		},
+		Capabilities: []string{"init"},
+	}
+
+	runner := NewMockRunner()
+	runner.Errors = []error{errors.New("cargo not found")}
+
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Init(context.Background())
+	if err == nil {
+		t.Error("expected error, got nil")
+	}
+}
+
+func TestGenericManager_Add_WithVersion(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "npm",
+		Binary: "npm",
+		Commands: map[string]definitions.Command{
+			"add": {
+				Base: []string{"install"},
+				Args: map[string]definitions.Arg{
+					"package": {Position: 0, Required: true},
+					"version": {Position: 0, Suffix: "@", Required: false},
+				},
+			},
+		},
+		Capabilities: []string{"add"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{ExitCode: 0}}
+
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Add(context.Background(), "lodash", AddOptions{Version: "4.17.21"})
+	if err != nil {
+		t.Fatalf("Add failed: %v", err)
+	}
+
+	expected := []string{"npm", "install", "lodash@4.17.21"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
+func TestGenericManager_Add_WithoutVersion(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "npm",
+		Binary: "npm",
+		Commands: map[string]definitions.Command{
+			"add": {
+				Base: []string{"install"},
+				Args: map[string]definitions.Arg{
+					"package": {Position: 0, Required: true},
+					"version": {Position: 0, Suffix: "@", Required: false},
+				},
+			},
+		},
+		Capabilities: []string{"add"},
+	}
+
+	runner := NewMockRunner()
+	runner.Results = []*Result{{ExitCode: 0}}
+
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Add(context.Background(), "lodash", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add failed: %v", err)
+	}
+
+	// Empty version should not produce a trailing @
+	expected := []string{"npm", "install", "lodash"}
+	if !slicesEqual(runner.Captured[0], expected) {
+		t.Errorf("got command %v, want %v", runner.Captured[0], expected)
+	}
+}
+
+// TestCapabilityOrdering pins the integer values of public Capability constants.
+// Inserting a new constant mid-block silently shifts everything after it; this
+// test will fail loudly if that happens. New capabilities go at the end.
+func TestCapabilityOrdering(t *testing.T) {
+	pinned := []struct {
+		cap  Capability
+		want int
+	}{
+		{CapInstall, 0},
+		{CapInstallFrozen, 1},
+		{CapInstallClean, 2},
+		{CapAdd, 3},
+		{CapAddDev, 4},
+		{CapAddOptional, 5},
+		{CapRemove, 6},
+		{CapUpdate, 7},
+		{CapList, 8},
+		{CapOutdated, 9},
+		{CapAudit, 10},
+		{CapWorkspace, 11},
+		{CapJSONOutput, 12},
+		{CapSBOMCycloneDX, 13},
+		{CapSBOMSPDX, 14},
+		{CapPath, 15},
+		{CapVendor, 16},
+		{CapResolve, 17},
+		{CapInit, 18},
+	}
+	for _, p := range pinned {
+		if int(p.cap) != p.want {
+			t.Errorf("%s = %d, want %d (did someone insert a new constant mid-iota?)", p.cap, int(p.cap), p.want)
+		}
+	}
+}
+
 func slicesEqual(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

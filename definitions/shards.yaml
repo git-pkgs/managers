@@ -15,6 +15,12 @@ version_detection:
   pattern: 'Shards (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [init]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install]
     flags:
@@ -78,6 +84,7 @@ commands:
       pattern: "lib/{package}"
 
 capabilities:
+  - init
   - install
   - install_frozen
   - list

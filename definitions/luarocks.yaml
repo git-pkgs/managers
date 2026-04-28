@@ -14,6 +14,12 @@ version_detection:
   pattern: 'LuaRocks (\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [init, resolve-tmp]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [install, --deps-only, .]
     flags:
@@ -81,6 +87,7 @@ commands:
       pattern: 'Installed in:\s+(\S+)'
 
 capabilities:
+  - init
   - install
   - add
   - remove

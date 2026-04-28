@@ -1,17 +1,17 @@
 package definitions
 
 type Definition struct {
-	Name             string              `yaml:"name"`
-	Ecosystem        string              `yaml:"ecosystem"`
-	Binary           string              `yaml:"binary"`
-	Version          string              `yaml:"version,omitempty"`
-	Status           string              `yaml:"status,omitempty"`
-	MinTested        string              `yaml:"min_tested,omitempty"`
-	MaxTested        string              `yaml:"max_tested,omitempty"`
-	Detection        Detection           `yaml:"detection"`
-	VersionDetection VersionDetection    `yaml:"version_detection,omitempty"`
-	Commands         map[string]Command  `yaml:"commands"`
-	Capabilities     []string            `yaml:"capabilities"`
+	Name             string             `yaml:"name"`
+	Ecosystem        string             `yaml:"ecosystem"`
+	Binary           string             `yaml:"binary"`
+	Version          string             `yaml:"version,omitempty"`
+	Status           string             `yaml:"status,omitempty"`
+	MinTested        string             `yaml:"min_tested,omitempty"`
+	MaxTested        string             `yaml:"max_tested,omitempty"`
+	Detection        Detection          `yaml:"detection"`
+	VersionDetection VersionDetection   `yaml:"version_detection,omitempty"`
+	Commands         map[string]Command `yaml:"commands"`
+	Capabilities     []string           `yaml:"capabilities"`
 }
 
 type Detection struct {

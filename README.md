@@ -4,7 +4,7 @@ A Go library that wraps package manager CLIs behind a common interface. Part of 
 
 ## What it does
 
-Translates generic operations (install, add, remove, list, outdated, update, vendor, resolve) into the correct CLI commands for each package manager. Define what you want to do once, and the library figures out the right command for npm, bundler, cargo, go, or any other supported manager.
+Translates generic operations (init, install, add, remove, list, outdated, update, vendor, resolve) into the correct CLI commands for each package manager. Define what you want to do once, and the library figures out the right command for npm, bundler, cargo, go, or any other supported manager.
 
 ```go
 translator := managers.NewTranslator()
@@ -83,7 +83,7 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | helm | helm | Chart.lock |
 | brew | homebrew | - |
 
-Most managers support: install, add, remove, list, outdated, update, resolve. Some also support vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
+Most managers support: install, add, remove, list, outdated, update, resolve. Some also support init, vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
 
 ## Installation
 
@@ -211,6 +211,7 @@ Built-in policies include AllowAllPolicy, DenyAllPolicy, and PackageBlocklistPol
 
 | Operation | Description |
 |-----------|-------------|
+| `init` | Initialize a new project with manifest file |
 | `install` | Install dependencies from lockfile |
 | `add` | Add a new dependency |
 | `remove` | Remove a dependency |
@@ -228,6 +229,20 @@ Built-in policies include AllowAllPolicy, DenyAllPolicy, and PackageBlocklistPol
 | `dev` | Add as development dependency |
 | `frozen` | Fail if lockfile would change (CI mode) |
 | `json` | Output in JSON format (where supported) |
+
+### Initializing projects
+
+The `init` operation creates a new project manifest in the current directory. This is useful for creating temporary projects for dependency resolution or scaffolding new projects.
+
+```go
+manager, _ := managers.Detect("/path/to/empty/dir")
+result, _ := manager.Init(ctx)
+// Creates package.json (npm), Gemfile (bundler), Cargo.toml (cargo), etc.
+```
+
+Only managers that can scaffold in-place are supported. Managers whose `new` command always creates a child directory (mix, lein, helm, stack, pub, rebar3) or whose `init` command bootstraps global state rather than a project (opam) are excluded.
+
+**Managers with init support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, uv, poetry, deno, composer, swift, nuget, gradle, conan, conda, cabal, nimble, luarocks, shards, vcpkg, renv
 
 ### Getting package paths
 

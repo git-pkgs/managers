@@ -9,6 +9,7 @@ type Manager interface {
 	Name() string
 	Ecosystem() string
 
+	Init(ctx context.Context) (*Result, error)
 	Install(ctx context.Context, opts InstallOptions) (*Result, error)
 	Add(ctx context.Context, pkg string, opts AddOptions) (*Result, error)
 	Remove(ctx context.Context, pkg string) (*Result, error)
@@ -30,6 +31,7 @@ type InstallOptions struct {
 }
 
 type AddOptions struct {
+	Version   string
 	Dev       bool
 	Optional  bool
 	Exact     bool
@@ -51,7 +53,7 @@ func (r *Result) Success() bool {
 }
 
 type PathResult struct {
-	Path   string // extracted path to the package
+	Path   string  // extracted path to the package
 	Result *Result // underlying command result
 }
 
@@ -84,9 +86,11 @@ const (
 	CapPath
 	CapVendor
 	CapResolve
+	CapInit
 )
 
 var capabilityNames = map[Capability]string{
+	CapInit:          "init",
 	CapInstall:       "install",
 	CapInstallFrozen: "install_frozen",
 	CapInstallClean:  "install_clean",

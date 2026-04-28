@@ -17,6 +17,12 @@ version_detection:
   pattern: '(\d+\.\d+\.\d+)'
 
 commands:
+  init:
+    base: [new, classlib]
+    exit_codes:
+      0: success
+      1: error
+
   install:
     base: [restore]
     base_overrides:
@@ -87,6 +93,7 @@ commands:
       1: error
 
 capabilities:
+  - init
   - install
   - install_frozen
   - add
