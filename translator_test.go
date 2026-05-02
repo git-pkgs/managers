@@ -3590,3 +3590,38 @@ func TestIsFatalExitCode(t *testing.T) {
 		})
 	}
 }
+
+func TestBuildCommandRejectsFlagShapedPackageName(t *testing.T) {
+	tr := loadTranslator(t)
+
+	tests := []struct {
+		manager string
+		pkg     string
+	}{
+		{"npm", "--registry=http://evil.example"},
+		{"npm", "-g"},
+		{"cargo", "--list"},
+	}
+
+	for _, tt := range tests {
+		_, err := tr.BuildCommand(tt.manager, "add", CommandInput{
+			Args: map[string]string{"package": tt.pkg},
+		})
+		if err == nil {
+			t.Errorf("BuildCommand(%q, add, %q) should reject flag-shaped package name", tt.manager, tt.pkg)
+		}
+	}
+}
+
+func TestBuildCommandAcceptsValidPackageName(t *testing.T) {
+	tr := loadTranslator(t)
+
+	for _, pkg := range []string{"lodash", "@babel/core"} {
+		_, err := tr.BuildCommand("npm", "add", CommandInput{
+			Args: map[string]string{"package": pkg},
+		})
+		if err != nil {
+			t.Errorf("BuildCommand(npm, add, %q) should be valid: %v", pkg, err)
+		}
+	}
+}
