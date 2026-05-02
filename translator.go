@@ -244,7 +244,7 @@ func (t *Translator) expandFlag(flag definitions.Flag, flags map[string]any) []s
 func (t *Translator) validate(validatorName, value string) error {
 	v, ok := t.validators[validatorName]
 	if !ok {
-		return nil
+		return ValidatePackageName(validatorName, value)
 	}
 
 	if v.MaxLength > 0 && len(value) > v.MaxLength {
