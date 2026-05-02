@@ -169,6 +169,33 @@ func TestPackageBlocklistPolicy(t *testing.T) {
 	}
 }
 
+func TestPackageBlocklistViaRunner(t *testing.T) {
+	mock := NewMockRunner()
+	policy := PackageBlocklistPolicy{
+		Blocked: map[string]string{"evil-package": "known malware"},
+	}
+	pr := NewPolicyRunner(mock, WithPolicies(policy))
+
+	_, err := pr.Run(context.Background(), "/tmp", "npm", "install", "evil-package")
+	if err == nil {
+		t.Fatal("expected blocklist policy to deny via Runner.Run path")
+	}
+
+	var violation *ErrPolicyViolation
+	if !errors.As(err, &violation) {
+		t.Fatalf("expected ErrPolicyViolation, got %T: %v", err, err)
+	}
+	if len(mock.Captured) != 0 {
+		t.Errorf("blocked command should not be executed")
+	}
+
+	// And an allowed package should still pass through.
+	_, err = pr.Run(context.Background(), "/tmp", "npm", "install", "lodash")
+	if err != nil {
+		t.Fatalf("allowed package should pass: %v", err)
+	}
+}
+
 func TestPolicyRunnerWithContext(t *testing.T) {
 	mock := NewMockRunner()
 	pr := NewPolicyRunner(mock, WithPolicies(AllowAllPolicy{}))

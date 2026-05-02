@@ -2,6 +2,7 @@ package managers
 
 import (
 	"context"
+	"strings"
 )
 
 // Policy defines an interface for checks that run before package operations.
@@ -156,6 +157,15 @@ func (pr *PolicyRunner) Run(ctx context.Context, dir string, args ...string) (*R
 	}
 	if len(args) > 1 {
 		op.Operation = args[1]
+	}
+	// Populate Packages from positional args so policies that inspect
+	// package names (e.g. PackageBlocklistPolicy) actually see them when
+	// invoked through the Runner interface.
+	for _, a := range args[min(2, len(args)):] {
+		if a == "" || strings.HasPrefix(a, "-") {
+			continue
+		}
+		op.Packages = append(op.Packages, a)
 	}
 
 	for _, policy := range pr.policies {
