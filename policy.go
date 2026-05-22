@@ -152,16 +152,17 @@ func (pr *PolicyRunner) Run(ctx context.Context, dir string, args ...string) (*R
 	}
 
 	// Extract manager and operation from command if possible
-	if len(args) > 0 {
-		op.Manager = args[0]
+	rest := args
+	if len(rest) > 0 {
+		op.Manager, rest = rest[0], rest[1:]
 	}
-	if len(args) > 1 {
-		op.Operation = args[1]
+	if len(rest) > 0 {
+		op.Operation, rest = rest[0], rest[1:]
 	}
 	// Populate Packages from positional args so policies that inspect
 	// package names (e.g. PackageBlocklistPolicy) actually see them when
 	// invoked through the Runner interface.
-	for _, a := range args[min(2, len(args)):] {
+	for _, a := range rest {
 		if a == "" || strings.HasPrefix(a, "-") {
 			continue
 		}
