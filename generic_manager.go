@@ -6,6 +6,8 @@ import (
 	"github.com/git-pkgs/managers/definitions"
 )
 
+const argPackage = "package"
+
 type GenericManager struct {
 	def        *definitions.Definition
 	dir        string
@@ -65,7 +67,7 @@ func (m *GenericManager) Install(ctx context.Context, opts InstallOptions) (*Res
 func (m *GenericManager) Add(ctx context.Context, pkg string, opts AddOptions) (*Result, error) {
 	input := CommandInput{
 		Args: map[string]string{
-			"package": pkg,
+			argPackage: pkg,
 		},
 		Flags: map[string]any{
 			"dev":       opts.Dev,
@@ -90,7 +92,7 @@ func (m *GenericManager) Add(ctx context.Context, pkg string, opts AddOptions) (
 func (m *GenericManager) Remove(ctx context.Context, pkg string) (*Result, error) {
 	input := CommandInput{
 		Args: map[string]string{
-			"package": pkg,
+			argPackage: pkg,
 		},
 		Flags: map[string]any{},
 	}
@@ -138,7 +140,7 @@ func (m *GenericManager) Update(ctx context.Context, pkg string) (*Result, error
 	}
 
 	if pkg != "" {
-		input.Args["package"] = pkg
+		input.Args[argPackage] = pkg
 	}
 
 	cmd, err := m.translator.BuildCommand(m.def.Name, "update", input)
@@ -200,7 +202,7 @@ func (m *GenericManager) Resolve(ctx context.Context) (*Result, error) {
 func (m *GenericManager) Path(ctx context.Context, pkg string) (*PathResult, error) {
 	input := CommandInput{
 		Args: map[string]string{
-			"package": pkg,
+			argPackage: pkg,
 		},
 		Flags: map[string]any{},
 	}

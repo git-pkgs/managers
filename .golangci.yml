@@ -1,0 +1,25 @@
+version: "2"
+
+linters:
+  enable:
+    - gocritic
+    - gocognit
+    - gocyclo
+    - maintidx
+    - dupl
+    - mnd
+    - unparam
+    - ireturn
+    - goconst
+    - errcheck
+  settings:
+    goconst:
+      ignore-tests: true
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl
+      - path: ^docs/examples/
+        linters:
+          - goconst
