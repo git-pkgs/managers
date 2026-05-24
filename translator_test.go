@@ -703,11 +703,27 @@ func TestUvOutdated(t *testing.T) {
 
 func TestUvUpdate(t *testing.T) {
 	tr := loadTranslator(t)
-	cmd, err := tr.BuildCommand("uv", "update", CommandInput{})
+	cmd, err := tr.BuildCommand("uv", "update", CommandInput{
+		Flags: map[string]any{"all": true},
+	})
 	if err != nil {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
 	expected := []string{"uv", "sync", "--upgrade"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestUvUpdatePackage(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("uv", "update", CommandInput{
+		Args: map[string]string{"package": "requests"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"uv", "sync", "--upgrade-package", "requests"}
 	if !reflect.DeepEqual(cmd, expected) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}
