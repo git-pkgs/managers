@@ -110,9 +110,10 @@ commands:
         required: false
         validate: pypi_package
         flag: "--upgrade-package"
+        suppresses_default_flags: true
     flags:
       quiet: [--quiet]
-      all: [--upgrade]
+    default_flags: [--upgrade]
     exit_codes:
       0: success
       1: error

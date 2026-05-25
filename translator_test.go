@@ -703,9 +703,7 @@ func TestUvOutdated(t *testing.T) {
 
 func TestUvUpdate(t *testing.T) {
 	tr := loadTranslator(t)
-	cmd, err := tr.BuildCommand("uv", "update", CommandInput{
-		Flags: map[string]any{"all": true},
-	})
+	cmd, err := tr.BuildCommand("uv", "update", CommandInput{})
 	if err != nil {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
