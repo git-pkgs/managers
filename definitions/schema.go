@@ -56,13 +56,14 @@ type Extract struct {
 }
 
 type Arg struct {
-	Position       int    `yaml:"position"`
-	Required       bool   `yaml:"required"`
-	Validate       string `yaml:"validate,omitempty"`
-	Flag           string `yaml:"flag,omitempty"`
-	Suffix         string `yaml:"suffix,omitempty"`          // append user value with this prefix, e.g. "@" for pkg@version
-	FixedSuffix    string `yaml:"fixed_suffix,omitempty"`    // always append this suffix, e.g. "@none" for go remove
-	ExtractionOnly bool   `yaml:"extraction_only,omitempty"` // arg is only used for output extraction, not passed to command
+	Position             int    `yaml:"position"`
+	Required             bool   `yaml:"required"`
+	Validate             string `yaml:"validate,omitempty"`
+	Flag                 string `yaml:"flag,omitempty"`
+	Suffix               string `yaml:"suffix,omitempty"`                   // append user value with this prefix, e.g. "@" for pkg@version
+	FixedSuffix          string `yaml:"fixed_suffix,omitempty"`             // always append this suffix, e.g. "@none" for go remove
+	ExtractionOnly       bool   `yaml:"extraction_only,omitempty"`          // arg is only used for output extraction, not passed to command
+	SuppressDefaultFlags bool   `yaml:"suppresses_default_flags,omitempty"` // if this arg is passed, then we want to skip default flags
 }
 
 type Flag struct {

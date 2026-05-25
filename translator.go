@@ -89,6 +89,8 @@ func (t *Translator) buildCommandChain(binary string, cmd definitions.Command, i
 func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, input CommandInput) ([]string, error) {
 	args := []string{binary}
 
+	suppressDefaultFlags := false
+
 	baseOverrideUsed := t.applyBaseOverrides(&args, cmd, input)
 
 	packageVal := input.Args["package"]
@@ -103,11 +105,16 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 		if val == "" {
 			continue
 		}
+		if entry.argDef.SuppressDefaultFlags {
+			suppressDefaultFlags = true
+		}
 	}
 
 	t.applyVersionSuffix(&args, cmd, input, packageVal)
 
-	args = append(args, cmd.DefaultFlags...)
+	if !suppressDefaultFlags {
+		args = append(args, cmd.DefaultFlags...)
+	}
 
 	t.applyUserFlags(&args, cmd, input, baseOverrideUsed)
 

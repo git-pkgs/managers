@@ -106,7 +106,11 @@ commands:
   update:
     base: [sync]
     args:
-      package: {position: 0, required: false, validate: pypi_package}
+      package:
+        required: false
+        validate: pypi_package
+        flag: "--upgrade-package"
+        suppresses_default_flags: true
     flags:
       quiet: [--quiet]
     default_flags: [--upgrade]

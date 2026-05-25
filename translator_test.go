@@ -713,6 +713,20 @@ func TestUvUpdate(t *testing.T) {
 	}
 }
 
+func TestUvUpdatePackage(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("uv", "update", CommandInput{
+		Args: map[string]string{"package": "requests"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"uv", "sync", "--upgrade-package", "requests"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
 // --- yarn tests ---
 
 func TestYarnInstall(t *testing.T) {
