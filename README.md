@@ -293,9 +293,7 @@ result, _ := manager.Replace(ctx, "github.com/spf13/cobra", managers.ReplaceOpti
 })
 ```
 
-For Go this runs `go mod edit -replace`; for npm-family managers it installs the package from a `file:` or `git+` spec; for composer it adds a `repositories` entry via `composer config`. Cargo, uv and bundler have no CLI for source overrides, so the `Cargo.toml` `[patch.crates-io]` table, `pyproject.toml` `[tool.uv.sources]` table, and the `Gemfile` `gem` line are edited directly. The npm-family managers don't support `Drop` because the original registry constraint can't be recovered; use `Add` with a version to restore it.
-
-For Go modules, `Ref` must be a module version or pseudo-version since `go.mod` replace directives don't accept branch names; resolve a branch with `go list -m module@branch` first or use `Path` with a local clone.
+For Go this runs `go mod edit -replace`; for npm-family managers it installs the package from a `file:` or `git+` spec; for composer it adds a `repositories` entry. Cargo, uv and bundler have no CLI for source overrides, so their manifests are edited directly. See [docs/replace.md](docs/replace.md) for per-manager behaviour, limitations, and how to add support to a new manager.
 
 **Managers with replace support:** gomod, npm, pnpm, yarn, bun, composer, cargo, uv, bundler
 
