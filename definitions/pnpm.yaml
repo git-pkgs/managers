@@ -123,6 +123,15 @@ commands:
       0: success
       1: error
 
+  # spec is "pkg@file:../path" or "pkg@git+url#ref"
+  replace:
+    base: [add]
+    args:
+      spec: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - init
   - install
@@ -138,3 +147,6 @@ capabilities:
   - json_output
   - path
   - resolve
+  - replace_path
+  - replace_git
+  # No replace_drop: original registry constraint is not recoverable

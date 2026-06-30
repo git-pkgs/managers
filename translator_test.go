@@ -3639,3 +3639,94 @@ func TestBuildCommandAcceptsValidPackageName(t *testing.T) {
 		}
 	}
 }
+
+// --- replace tests ---
+
+func TestGomodReplaceSpec(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("gomod", "replace", CommandInput{
+		Args: map[string]string{"spec": "example.test/lib=../lib"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"go", "mod", "edit", "-replace", "example.test/lib=../lib"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestGomodReplaceDrop(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("gomod", "replace", CommandInput{
+		Args:  map[string]string{"package": "example.test/lib"},
+		Flags: map[string]any{"drop": true},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"go", "mod", "edit", "-dropreplace", "example.test/lib"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestNpmReplaceSpec(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("npm", "replace", CommandInput{
+		Args: map[string]string{"spec": "lodash@file:../lodash"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"npm", "install", "lodash@file:../lodash"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestPnpmReplaceSpec(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("pnpm", "replace", CommandInput{
+		Args: map[string]string{"spec": "lodash@file:../lodash"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"pnpm", "add", "lodash@file:../lodash"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestComposerReplacePath(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("composer", "replace", CommandInput{
+		Args: map[string]string{
+			"repository": "repositories.git-pkgs-vendor-pkg",
+			"payload":    `{"type":"path","url":"../pkg"}`,
+		},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"composer", "config", "repositories.git-pkgs-vendor-pkg", `{"type":"path","url":"../pkg"}`}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestComposerReplaceDrop(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("composer", "replace", CommandInput{
+		Args:  map[string]string{"repository": "repositories.git-pkgs-vendor-pkg"},
+		Flags: map[string]any{"drop": true},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"composer", "config", "--unset", "repositories.git-pkgs-vendor-pkg"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}

@@ -144,3 +144,8 @@ capabilities:
   - path
   - vendor
   - resolve
+  # replace edits the Gemfile gem line directly; bundle add can't change
+  # an existing gem's source without losing the version constraint
+  - replace_path
+  - replace_git
+  - replace_drop

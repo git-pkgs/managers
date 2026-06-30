@@ -19,6 +19,7 @@ type Manager interface {
 	Path(ctx context.Context, pkg string) (*PathResult, error)
 	Vendor(ctx context.Context) (*Result, error)
 	Resolve(ctx context.Context) (*Result, error)
+	Replace(ctx context.Context, pkg string, opts ReplaceOptions) (*Result, error)
 
 	Supports(cap Capability) bool
 	Capabilities() []Capability
@@ -36,6 +37,17 @@ type AddOptions struct {
 	Optional  bool
 	Exact     bool
 	Workspace string
+}
+
+// ReplaceOptions redirects a dependency to a non-registry source for
+// downstream testing. Exactly one of Path, Git, or Drop should be set;
+// Ref is only valid alongside Git.
+type ReplaceOptions struct {
+	Path  string   // local filesystem path
+	Git   string   // git repository URL
+	Ref   string   // branch, tag, or revision for Git
+	Drop  bool     // remove an existing replacement
+	Extra []string // raw arguments appended to the command
 }
 
 type Result struct {
@@ -87,6 +99,9 @@ const (
 	CapVendor
 	CapResolve
 	CapInit
+	CapReplacePath
+	CapReplaceGit
+	CapReplaceDrop
 )
 
 var capabilityNames = map[Capability]string{
@@ -109,6 +124,9 @@ var capabilityNames = map[Capability]string{
 	CapPath:          "path",
 	CapVendor:        "vendor",
 	CapResolve:       "resolve",
+	CapReplacePath:   "replace_path",
+	CapReplaceGit:    "replace_git",
+	CapReplaceDrop:   "replace_drop",
 }
 
 func (c Capability) String() string {
