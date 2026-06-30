@@ -147,5 +147,10 @@ capabilities:
   - path
   - vendor
   - resolve
+  # replace edits Cargo.toml [patch.crates-io] directly; cargo has no
+  # CLI for patch entries
+  - replace_path
+  - replace_git
+  - replace_drop
   # No json_output for tree by default
   # No native outdated

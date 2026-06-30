@@ -4,7 +4,7 @@ A Go library that wraps package manager CLIs behind a common interface. Part of 
 
 ## What it does
 
-Translates generic operations (init, install, add, remove, list, outdated, update, vendor, resolve) into the correct CLI commands for each package manager. Define what you want to do once, and the library figures out the right command for npm, bundler, cargo, go, or any other supported manager.
+Translates generic operations (init, install, add, remove, list, outdated, update, vendor, resolve, replace) into the correct CLI commands for each package manager. Define what you want to do once, and the library figures out the right command for npm, bundler, cargo, go, or any other supported manager.
 
 ```go
 translator := managers.NewTranslator()
@@ -221,6 +221,7 @@ Built-in policies include AllowAllPolicy, DenyAllPolicy, and PackageBlocklistPol
 | `path` | Get filesystem path to installed package |
 | `vendor` | Copy dependencies into the project directory |
 | `resolve` | Produce dependency graph output from the local CLI |
+| `replace` | Redirect a dependency to a local path or git ref |
 
 ### Common flags
 
@@ -281,6 +282,23 @@ fmt.Println(result.Stdout) // raw CLI output (JSON tree, text tree, etc.)
 
 **Managers with resolve support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, pip, uv, poetry, conda, composer, maven, gradle, lein, swift, deno, stack, pub, mix, rebar3, nuget, conan, helm, renv
 
+### Replacing a dependency
+
+The `replace` operation points a dependency at a local checkout or git ref instead of the registry, for testing a library against its dependents before release. Pass exactly one of `Path`, `Git` (with optional `Ref`), or `Drop`.
+
+```go
+manager, _ := managers.Detect("/path/to/dependent")
+result, _ := manager.Replace(ctx, "github.com/spf13/cobra", managers.ReplaceOptions{
+    Path: "../cobra",
+})
+```
+
+For Go this runs `go mod edit -replace`; for npm-family managers it installs the package from a `file:` or `git+` spec; for composer it adds a `repositories` entry via `composer config`. Cargo, uv and bundler have no CLI for source overrides, so the `Cargo.toml` `[patch.crates-io]` table, `pyproject.toml` `[tool.uv.sources]` table, and the `Gemfile` `gem` line are edited directly. The npm-family managers don't support `Drop` because the original registry constraint can't be recovered; use `Add` with a version to restore it.
+
+For Go modules, `Ref` must be a module version or pseudo-version since `go.mod` replace directives don't accept branch names; resolve a branch with `go list -m module@branch` first or use `Path` with a local clone.
+
+**Managers with replace support:** gomod, npm, pnpm, yarn, bun, composer, cargo, uv, bundler
+
 ### Escape hatch
 
 For manager-specific flags not covered by the common interface, use `Extra`:
@@ -295,7 +313,7 @@ cmd, _ := translator.BuildCommand("npm", "install", managers.CommandInput{
 
 ## Configuration files
 
-This library builds and executes CLI commands. It doesn't read or modify package manager configuration files. When commands run, they inherit the environment and respect native config files:
+This library builds and executes CLI commands. With the exception of `replace` for cargo, uv and bundler (which edits the manifest because those managers have no CLI for source overrides), it doesn't read or modify package manager configuration files. When commands run, they inherit the environment and respect native config files:
 
 - npm/yarn/pnpm: `.npmrc`, `~/.npmrc`
 - pip/poetry/uv: `pip.conf`, `.pypirc`, `pyproject.toml`

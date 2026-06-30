@@ -105,6 +105,17 @@ commands:
       0: success
       1: partial
 
+  # Redirect a direct dependency to a local path or git ref.
+  # spec is a full install target like "lodash@file:../lodash"
+  # or "lodash@git+https://github.com/fork/lodash#branch".
+  replace:
+    base: [install]
+    args:
+      spec: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - init
   - install
@@ -120,3 +131,6 @@ capabilities:
   - json_output
   - path
   - resolve
+  - replace_path
+  - replace_git
+  # No replace_drop: original registry constraint is not recoverable

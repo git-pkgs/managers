@@ -149,4 +149,8 @@ capabilities:
   - workspace
   - path
   - resolve
+  # replace edits pyproject.toml [tool.uv.sources] directly
+  - replace_path
+  - replace_git
+  - replace_drop
   # no native json_output for tree

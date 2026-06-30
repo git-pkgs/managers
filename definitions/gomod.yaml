@@ -122,6 +122,20 @@ commands:
       0: success
       1: error
 
+  # go mod edit -replace module=target redirects a dependency.
+  # The spec arg is the full "module=target" string built by the caller;
+  # drop mode uses -dropreplace with the bare module path.
+  replace:
+    base: [mod, edit]
+    base_overrides:
+      drop: [mod, edit, -dropreplace]
+    args:
+      spec: {flag: -replace, required: false}
+      package: {position: 0, required: false, validate: go_module}
+    exit_codes:
+      0: success
+      1: error
+
   # go mod vendor copies all dependencies into vendor/
   vendor:
     base: [mod, vendor]
@@ -141,4 +155,7 @@ capabilities:
   - path
   - vendor
   - resolve
+  - replace_path
+  - replace_git
+  - replace_drop
   # No add_dev - Go doesn't have dev dependencies

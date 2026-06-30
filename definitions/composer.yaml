@@ -97,6 +97,20 @@ commands:
       0: success
       1: error
 
+  # composer config repositories.<key> '{"type":"path","url":"..."}'
+  # adds a path/vcs repository entry; drop unsets it. A git ref also
+  # needs a follow-up "composer require pkg:dev-<ref>" via the add op.
+  replace:
+    base: [config]
+    base_overrides:
+      drop: [config, --unset]
+    args:
+      repository: {position: 0, required: true}
+      payload: {position: 1, required: false}
+    exit_codes:
+      0: success
+      1: error
+
 capabilities:
   - init
   - install
@@ -109,3 +123,6 @@ capabilities:
   - json_output
   - path
   - resolve
+  - replace_path
+  - replace_git
+  - replace_drop
