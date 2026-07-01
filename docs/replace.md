@@ -19,7 +19,7 @@ Most package managers expose this as a CLI command. Three (cargo, uv, bundler) o
 
 | Manager | Path | Git | Drop | Mechanism |
 |---|---|---|---|---|
-| gomod | yes | yes | yes | `go mod edit -replace` / `-dropreplace` |
+| gomod | yes | yes | yes | `go mod edit -replace` / `-dropreplace`, then `go mod tidy` |
 | npm | yes | yes | no | `npm install pkg@file:...` / `pkg@git+url#ref` |
 | pnpm | yes | yes | no | `pnpm add pkg@file:...` / `pkg@git+url#ref` |
 | yarn | yes | yes | no | `yarn add pkg@file:...` / `pkg@git+url#ref` |
@@ -36,16 +36,21 @@ Anything not listed returns `ErrUnsupportedOperation`. pip has no override mecha
 ```go
 mgr.Replace(ctx, "github.com/spf13/cobra", managers.ReplaceOptions{Path: "../cobra"})
 // go mod edit -replace github.com/spf13/cobra=../cobra
+// go mod tidy
 
 mgr.Replace(ctx, "github.com/spf13/cobra", managers.ReplaceOptions{
     Git: "https://github.com/fork/cobra",
     Ref: "v1.8.1-0.20240520123456-abcdef123456",
 })
 // go mod edit -replace github.com/spf13/cobra=github.com/fork/cobra@v1.8.1-0.20240520...
+// go mod tidy
 
 mgr.Replace(ctx, "github.com/spf13/cobra", managers.ReplaceOptions{Drop: true})
 // go mod edit -dropreplace github.com/spf13/cobra
+// go mod tidy
 ```
+
+`go mod edit` is a text edit that doesn't touch `go.sum`, so `Replace` runs `go mod tidy` afterwards to pick up any change in the replacement's transitive requirements. This matches `Add`, which chains `tidy` for the same reason.
 
 The git URL is normalised to a module path (scheme and `.git` stripped, `git@host:path` converted). `Ref` must be a Go module version or pseudo-version; `go.mod` replace directives don't accept branch names, and `Replace` rejects them rather than letting `go mod edit` fail later. To target a branch, resolve it first:
 

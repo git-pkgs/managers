@@ -151,7 +151,13 @@ func buildGoReplaceInputs(pkg string, mode replaceMode, opts ReplaceOptions) ([]
 		input.Args[argPackage] = pkg
 		input.Flags["drop"] = true
 	}
-	return []replaceInput{{operation: opReplace, input: input}}, nil
+	// go mod edit is a text edit; tidy afterwards so go.sum reflects the
+	// replacement's transitive requirements. Matches Add, which chains
+	// tidy via then: in gomod.yaml.
+	return []replaceInput{
+		{operation: opReplace, input: input},
+		{operation: "tidy", input: CommandInput{Args: map[string]string{}, Flags: map[string]any{}}},
+	}, nil
 }
 
 func buildNPMReplaceInputs(manager, pkg string, mode replaceMode, opts ReplaceOptions) ([]replaceInput, error) {
