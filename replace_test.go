@@ -57,7 +57,10 @@ func TestReplaceGoPath(t *testing.T) {
 	runner := NewMockRunner()
 	mgr := newReplaceTestManager(t, "gomod", "/test/dependent", runner)
 
-	result, err := mgr.Replace(context.Background(), "example.test/lib", ReplaceOptions{Path: "../lib"})
+	result, err := mgr.Replace(context.Background(), "example.test/lib", ReplaceOptions{
+		Path:  "../lib",
+		Extra: []string{"-modfile=go.local.mod"},
+	})
 	if err != nil {
 		t.Fatalf("Replace: %v", err)
 	}
@@ -65,8 +68,8 @@ func TestReplaceGoPath(t *testing.T) {
 		t.Fatalf("result = %+v, want success", result)
 	}
 	want := [][]string{
-		{"go", "mod", "edit", "-replace", "example.test/lib=../lib"},
-		{"go", "mod", "tidy"},
+		{"go", "mod", "edit", "-replace", "example.test/lib=../lib", "-modfile=go.local.mod"},
+		{"go", "mod", "tidy", "-modfile=go.local.mod"},
 	}
 	if !reflect.DeepEqual(runner.Captured, want) {
 		t.Errorf("got %v, want %v", runner.Captured, want)

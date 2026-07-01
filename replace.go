@@ -153,10 +153,11 @@ func buildGoReplaceInputs(pkg string, mode replaceMode, opts ReplaceOptions) ([]
 	}
 	// go mod edit is a text edit; tidy afterwards so go.sum reflects the
 	// replacement's transitive requirements. Matches Add, which chains
-	// tidy via then: in gomod.yaml.
+	// tidy via then: in gomod.yaml. Extra propagates so flags like
+	// -modfile apply to both steps.
 	return []replaceInput{
 		{operation: opReplace, input: input},
-		{operation: "tidy", input: CommandInput{Args: map[string]string{}, Flags: map[string]any{}}},
+		{operation: "tidy", input: CommandInput{Args: map[string]string{}, Flags: map[string]any{}, Extra: opts.Extra}},
 	}, nil
 }
 
