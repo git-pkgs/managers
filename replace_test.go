@@ -57,16 +57,22 @@ func TestReplaceGoPath(t *testing.T) {
 	runner := NewMockRunner()
 	mgr := newReplaceTestManager(t, "gomod", "/test/dependent", runner)
 
-	result, err := mgr.Replace(context.Background(), "example.test/lib", ReplaceOptions{Path: "../lib"})
+	result, err := mgr.Replace(context.Background(), "example.test/lib", ReplaceOptions{
+		Path:  "../lib",
+		Extra: []string{"-modfile=go.local.mod"},
+	})
 	if err != nil {
 		t.Fatalf("Replace: %v", err)
 	}
 	if !result.Success() {
 		t.Fatalf("result = %+v, want success", result)
 	}
-	want := []string{"go", "mod", "edit", "-replace", "example.test/lib=../lib"}
-	if !reflect.DeepEqual(runner.LastCaptured(), want) {
-		t.Errorf("got %v, want %v", runner.LastCaptured(), want)
+	want := [][]string{
+		{"go", "mod", "edit", "-replace", "example.test/lib=../lib", "-modfile=go.local.mod"},
+		{"go", "mod", "tidy", "-modfile=go.local.mod"},
+	}
+	if !reflect.DeepEqual(runner.Captured, want) {
+		t.Errorf("got %v, want %v", runner.Captured, want)
 	}
 }
 
@@ -81,9 +87,12 @@ func TestReplaceGoGit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Replace: %v", err)
 	}
-	want := []string{"go", "mod", "edit", "-replace", "example.test/lib=github.com/fork/lib@v1.2.3"}
-	if !reflect.DeepEqual(runner.LastCaptured(), want) {
-		t.Errorf("got %v, want %v", runner.LastCaptured(), want)
+	want := [][]string{
+		{"go", "mod", "edit", "-replace", "example.test/lib=github.com/fork/lib@v1.2.3"},
+		{"go", "mod", "tidy"},
+	}
+	if !reflect.DeepEqual(runner.Captured, want) {
+		t.Errorf("got %v, want %v", runner.Captured, want)
 	}
 }
 
@@ -115,9 +124,29 @@ func TestReplaceGoDrop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Replace: %v", err)
 	}
-	want := []string{"go", "mod", "edit", "-dropreplace", "example.test/lib"}
-	if !reflect.DeepEqual(runner.LastCaptured(), want) {
-		t.Errorf("got %v, want %v", runner.LastCaptured(), want)
+	want := [][]string{
+		{"go", "mod", "edit", "-dropreplace", "example.test/lib"},
+		{"go", "mod", "tidy"},
+	}
+	if !reflect.DeepEqual(runner.Captured, want) {
+		t.Errorf("got %v, want %v", runner.Captured, want)
+	}
+}
+
+func TestReplaceGoEditFailureSkipsTidy(t *testing.T) {
+	runner := NewMockRunner()
+	runner.Results = []*Result{{ExitCode: 1, Stderr: "bad module path"}}
+	mgr := newReplaceTestManager(t, "gomod", "/test/dependent", runner)
+
+	result, err := mgr.Replace(context.Background(), "example.test/lib", ReplaceOptions{Path: "../lib"})
+	if err != nil {
+		t.Fatalf("Replace: %v", err)
+	}
+	if result.Success() {
+		t.Fatalf("result = %+v, want failure", result)
+	}
+	if len(runner.Captured) != 1 {
+		t.Errorf("captured %d commands, want 1 (tidy should not run after failed edit)", len(runner.Captured))
 	}
 }
 
