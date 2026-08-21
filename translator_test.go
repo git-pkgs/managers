@@ -3218,7 +3218,7 @@ func TestPipPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
-	expected := []string{"pip", "show", "requests"}
+	expected := []string{"pip", "show", "-f", "requests"}
 	if !reflect.DeepEqual(cmd, expected) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}
@@ -3232,7 +3232,7 @@ func TestUvPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
-	expected := []string{"uv", "pip", "show", "requests"}
+	expected := []string{"uv", "pip", "show", "-f", "requests"}
 	if !reflect.DeepEqual(cmd, expected) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}
@@ -3387,7 +3387,7 @@ func TestPoetryPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
-	expected := []string{"poetry", "run", "pip", "show", "requests"}
+	expected := []string{"poetry", "run", "pip", "show", "-f", "requests"}
 	if !reflect.DeepEqual(cmd, expected) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}

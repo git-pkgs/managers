@@ -256,6 +256,7 @@ fmt.Println(result.Path) // "/path/to/project/node_modules/lodash"
 ```
 
 The library handles extracting clean paths from various output formats (JSON, line-based, regex patterns). For managers with predictable locations (yarn, mix, shards), paths are computed from templates.
+Python path results also include `result.Files`, resolved from `pip show --files`, because several distributions share one `site-packages` directory.
 
 **Managers with path support:** npm, pnpm, yarn, bun, bundler, gem, pip, uv, poetry, conda, gomod, cargo, composer, brew, deno, nimble, opam, luarocks, conan, mix, shards, rebar3, renv
 

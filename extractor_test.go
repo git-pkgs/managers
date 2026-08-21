@@ -1,6 +1,7 @@
 package managers
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/git-pkgs/managers/definitions"
@@ -82,6 +83,60 @@ Version: 2.28.1`
 	}, "")
 	if err == nil {
 		t.Error("expected error for missing prefix, got nil")
+	}
+}
+
+func TestExtractPathResult_PythonDistribution(t *testing.T) {
+	output := `Name: packaging
+Version: 25.0
+Location: /venv/lib/python3.12/site-packages
+Files:
+  ../../../bin/packaging-tool
+  packaging-25.0.dist-info/licenses/LICENSE
+  packaging/__init__.py
+  packaging/__init__.py
+`
+	result, err := extractPathResult(output, &definitions.Extract{
+		Type: "python_distribution",
+	}, "packaging")
+	if err != nil {
+		t.Fatalf("ExtractPathResult failed: %v", err)
+	}
+	if result.Path != "/venv/lib/python3.12/site-packages" {
+		t.Errorf("path = %q", result.Path)
+	}
+	wantFiles := []string{
+		filepath.Clean("/venv/bin/packaging-tool"),
+		filepath.Clean("/venv/lib/python3.12/site-packages/packaging-25.0.dist-info/licenses/LICENSE"),
+		filepath.Clean("/venv/lib/python3.12/site-packages/packaging/__init__.py"),
+	}
+	if !slicesEqual(result.Files, wantFiles) {
+		t.Errorf("files = %#v, want %#v", result.Files, wantFiles)
+	}
+
+	path, err := ExtractPath(output, &definitions.Extract{Type: "python_distribution"}, "packaging")
+	if err != nil {
+		t.Fatalf("ExtractPath failed: %v", err)
+	}
+	if path != result.Path {
+		t.Errorf("ExtractPath = %q, want %q", path, result.Path)
+	}
+}
+
+func TestExtractPathResult_PythonDistributionWithoutRecord(t *testing.T) {
+	output := `Name: example
+Location: /venv/lib/python3.12/site-packages
+Files:
+Cannot locate RECORD or installed-files.txt
+`
+	result, err := extractPathResult(output, &definitions.Extract{
+		Type: "python_distribution",
+	}, "example")
+	if err != nil {
+		t.Fatalf("ExtractPathResult failed: %v", err)
+	}
+	if len(result.Files) != 0 {
+		t.Errorf("files = %#v, want none", result.Files)
 	}
 }
 

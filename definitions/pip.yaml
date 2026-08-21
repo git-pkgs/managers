@@ -78,15 +78,14 @@ commands:
       1: error
 
   path:
-    base: [show]
+    base: [show, -f]
     args:
       package: {position: 0, required: true}
     exit_codes:
       0: success
       1: error
     extract:
-      type: line_prefix
-      prefix: "Location: "
+      type: python_distribution
 
   resolve:
     base: [inspect]

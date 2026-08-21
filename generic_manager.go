@@ -222,13 +222,10 @@ func (m *GenericManager) Path(ctx context.Context, pkg string) (*PathResult, err
 		extract = pathCmd.Extract
 	}
 
-	path, err := ExtractPath(result.Stdout, extract, pkg)
+	pathResult, err := extractPathResult(result.Stdout, extract, pkg)
 	if err != nil {
 		return &PathResult{Result: result}, err
 	}
-
-	return &PathResult{
-		Path:   path,
-		Result: result,
-	}, nil
+	pathResult.Result = result
+	return pathResult, nil
 }
