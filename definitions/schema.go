@@ -45,7 +45,7 @@ type Command struct {
 }
 
 type Extract struct {
-	Type          string `yaml:"type"`                     // raw, json, line_prefix, regex, json_array, template
+	Type          string `yaml:"type"`                     // raw, json, line_prefix, regex, json_array, template, python_distribution
 	Field         string `yaml:"field,omitempty"`          // for json: field name to extract
 	Prefix        string `yaml:"prefix,omitempty"`         // for line_prefix: prefix to match
 	Pattern       string `yaml:"pattern,omitempty"`        // for regex: pattern with capture group; for template: path pattern with {package}

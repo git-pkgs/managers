@@ -95,6 +95,8 @@ Files:
   packaging-25.0.dist-info/licenses/LICENSE
   packaging/__init__.py
   packaging/__init__.py
+Installer: pip
+  ignored-content
 `
 	result, err := extractPathResult(output, &definitions.Extract{
 		Type: "python_distribution",

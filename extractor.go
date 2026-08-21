@@ -77,12 +77,15 @@ func extractPythonDistribution(output string) (string, []string, error) {
 			inFiles = true
 			continue
 		}
-		if !inFiles || !startsWithWhitespace(line) {
+		if !inFiles {
 			continue
 		}
 		file := strings.TrimSpace(line)
 		if file == "" {
 			continue
+		}
+		if !startsWithWhitespace(line) {
+			break
 		}
 		if !filepath.IsAbs(file) {
 			file = filepath.Join(location, filepath.FromSlash(file))

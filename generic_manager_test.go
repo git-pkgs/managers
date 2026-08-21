@@ -3,6 +3,7 @@ package managers
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"testing"
 
 	"github.com/git-pkgs/managers/definitions"
@@ -172,8 +173,8 @@ Files:
 		t.Errorf("path = %q", result.Path)
 	}
 	wantFiles := []string{
-		"/venv/lib/python3.12/site-packages/requests-2.32.0.dist-info/licenses/LICENSE",
-		"/venv/lib/python3.12/site-packages/requests/__init__.py",
+		filepath.Clean("/venv/lib/python3.12/site-packages/requests-2.32.0.dist-info/licenses/LICENSE"),
+		filepath.Clean("/venv/lib/python3.12/site-packages/requests/__init__.py"),
 	}
 	if !slicesEqual(result.Files, wantFiles) {
 		t.Errorf("files = %#v, want %#v", result.Files, wantFiles)
