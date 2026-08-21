@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/git-pkgs/managers/definitions"
@@ -29,6 +30,8 @@ func ExtractPath(output string, extract *definitions.Extract, pkg string) (strin
 		result, err = extractJSONArray(output, extract.ArrayField, extract.MatchField, extract.ExtractField, pkg)
 	case "template":
 		result, err = extractTemplate(extract.Pattern, pkg)
+	case "python_distribution":
+		result, _, err = extractPythonDistribution(output)
 	default:
 		return "", fmt.Errorf("unknown extract type: %s", extract.Type)
 	}
@@ -42,6 +45,60 @@ func ExtractPath(output string, extract *definitions.Extract, pkg string) (strin
 	}
 
 	return result, nil
+}
+
+func extractPathResult(output string, extract *definitions.Extract, pkg string) (*PathResult, error) {
+	if extract != nil && extract.Type == "python_distribution" {
+		path, files, err := extractPythonDistribution(output)
+		if err != nil {
+			return nil, err
+		}
+		return &PathResult{Path: path, Files: files}, nil
+	}
+
+	path, err := ExtractPath(output, extract, pkg)
+	if err != nil {
+		return nil, err
+	}
+	return &PathResult{Path: path}, nil
+}
+
+func extractPythonDistribution(output string) (string, []string, error) {
+	location, err := extractLinePrefix(output, "Location: ")
+	if err != nil {
+		return "", nil, err
+	}
+
+	lines := strings.Split(output, "\n")
+	files := make([]string, 0)
+	inFiles := false
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "Files:" {
+			inFiles = true
+			continue
+		}
+		if !inFiles {
+			continue
+		}
+		file := strings.TrimSpace(line)
+		if file == "" {
+			continue
+		}
+		if !startsWithWhitespace(line) {
+			break
+		}
+		if !filepath.IsAbs(file) {
+			file = filepath.Join(location, filepath.FromSlash(file))
+		}
+		files = append(files, filepath.Clean(file))
+	}
+	slices.Sort(files)
+	files = slices.Compact(files)
+	return location, files, nil
+}
+
+func startsWithWhitespace(value string) bool {
+	return strings.HasPrefix(value, " ") || strings.HasPrefix(value, "\t")
 }
 
 func extractJSON(output string, field string) (string, error) {

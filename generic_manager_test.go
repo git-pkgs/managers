@@ -3,6 +3,7 @@ package managers
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"testing"
 
 	"github.com/git-pkgs/managers/definitions"
@@ -134,6 +135,52 @@ Requires: certifi, charset-normalizer`,
 	expected := "/usr/local/lib/python3.9/site-packages"
 	if result.Path != expected {
 		t.Errorf("got path %q, want %q", result.Path, expected)
+	}
+}
+
+func TestGenericManager_Path_PythonDistribution(t *testing.T) {
+	def := &definitions.Definition{
+		Name:   "pip",
+		Binary: "pip",
+		Commands: map[string]definitions.Command{
+			"path": {
+				Base: []string{"show", "-f"},
+				Args: map[string]definitions.Arg{
+					"package": {Position: 0, Required: true},
+				},
+				Extract: &definitions.Extract{Type: "python_distribution"},
+			},
+		},
+		Capabilities: []string{"path"},
+	}
+	runner := NewMockRunner()
+	runner.Results = []*Result{{
+		ExitCode: 0,
+		Stdout: `Name: requests
+Location: /venv/lib/python3.12/site-packages
+Files:
+  requests-2.32.0.dist-info/licenses/LICENSE
+  requests/__init__.py
+`,
+	}}
+
+	mgr := newTestManager(def, runner)
+	result, err := mgr.Path(context.Background(), "requests")
+	if err != nil {
+		t.Fatalf("Path failed: %v", err)
+	}
+	if result.Path != "/venv/lib/python3.12/site-packages" {
+		t.Errorf("path = %q", result.Path)
+	}
+	wantFiles := []string{
+		filepath.Clean("/venv/lib/python3.12/site-packages/requests-2.32.0.dist-info/licenses/LICENSE"),
+		filepath.Clean("/venv/lib/python3.12/site-packages/requests/__init__.py"),
+	}
+	if !slicesEqual(result.Files, wantFiles) {
+		t.Errorf("files = %#v, want %#v", result.Files, wantFiles)
+	}
+	if result.Result != runner.Results[0] {
+		t.Error("underlying command result was not retained")
 	}
 }
 

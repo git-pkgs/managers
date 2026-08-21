@@ -65,8 +65,9 @@ func (r *Result) Success() bool {
 }
 
 type PathResult struct {
-	Path   string  // extracted path to the package
-	Result *Result // underlying command result
+	Path   string   // extracted path to the package
+	Files  []string // files owned by the package, when reported by the manager
+	Result *Result  // underlying command result
 }
 
 type ExecContext int

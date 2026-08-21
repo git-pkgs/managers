@@ -120,15 +120,14 @@ commands:
 
   # uv pip show works like pip show
   path:
-    base: [pip, show]
+    base: [pip, show, -f]
     args:
       package: {position: 0, required: true, validate: pypi_package}
     exit_codes:
       0: success
       1: error
     extract:
-      type: line_prefix
-      prefix: "Location: "
+      type: python_distribution
 
   resolve:
     base: [tree]
