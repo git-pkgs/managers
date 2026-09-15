@@ -61,6 +61,68 @@ func TestGenericManager_Add_CargoVersion(t *testing.T) {
 	}
 }
 
+func TestGenericManager_Add_RunsThenChain(t *testing.T) {
+	runner := NewMockRunner()
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "github.com/pkg/errors", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	if len(runner.Captured) != 2 {
+		t.Fatalf("captured %d commands, want 2 (go get + go mod tidy)", len(runner.Captured))
+	}
+	if !slicesEqual(runner.Captured[0], []string{"go", "get", "github.com/pkg/errors"}) {
+		t.Errorf("cmd[0] = %v", runner.Captured[0])
+	}
+	if !slicesEqual(runner.Captured[1], []string{"go", "mod", "tidy"}) {
+		t.Errorf("cmd[1] = %v", runner.Captured[1])
+	}
+	// Result reflects the primary command on success.
+	if !slicesEqual(res.Command, []string{"go", "get", "github.com/pkg/errors"}) {
+		t.Errorf("res.Command = %v, want the primary go get", res.Command)
+	}
+}
+
+func TestGenericManager_Add_ChainStopsOnFailure(t *testing.T) {
+	runner := NewMockRunner()
+	runner.Results = []*Result{
+		{Command: []string{"go", "get", "x"}, ExitCode: 1, Stderr: "boom"},
+	}
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "example.com/x", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	if res.Success() {
+		t.Error("Success() should be false when first command exits non-zero")
+	}
+	if len(runner.Captured) != 1 {
+		t.Errorf("captured %d commands, want 1 (chain should stop)", len(runner.Captured))
+	}
+}
+
+func TestGenericManager_Add_ChainReturnsFailingThen(t *testing.T) {
+	runner := NewMockRunner()
+	runner.Results = []*Result{
+		{Command: []string{"go", "get", "x"}, ExitCode: 0},
+		{Command: []string{"go", "mod", "tidy"}, ExitCode: 1, Stderr: "tidy failed"},
+	}
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "example.com/x", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	if res.Success() {
+		t.Error("Success() should be false when a then: command exits non-zero")
+	}
+	if !slicesEqual(res.Command, []string{"go", "mod", "tidy"}) {
+		t.Errorf("res.Command = %v, want the failing then: command", res.Command)
+	}
+	if res.Stderr != "tidy failed" {
+		t.Errorf("res.Stderr = %q", res.Stderr)
+	}
+}
+
 func TestGenericManager_Path_Raw(t *testing.T) {
 	def := &definitions.Definition{
 		Name:   "testpkg",

@@ -32,43 +32,49 @@ func (m *GenericManager) Warnings() []string {
 	return m.warnings
 }
 
-func (m *GenericManager) Init(ctx context.Context) (*Result, error) {
-	input := CommandInput{
-		Args:  map[string]string{},
-		Flags: map[string]any{},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "init", input)
+// run builds the command chain for an operation (base command plus any
+// then: entries) and executes them in order. It returns the first
+// command's result when the whole chain succeeds. When a command fails,
+// either as a Go error or a non-zero exit, execution stops and that
+// command's result is returned so callers see what failed.
+func (m *GenericManager) run(ctx context.Context, operation string, input CommandInput) (*Result, error) {
+	cmds, err := m.translator.BuildCommands(m.def.Name, operation, input)
 	if err != nil {
 		return nil, err
 	}
+	var first *Result
+	for i, cmd := range cmds {
+		res, err := m.runner.Run(ctx, m.dir, cmd...)
+		if err != nil {
+			return res, err
+		}
+		if i == 0 {
+			first = res
+		}
+		if !res.Success() {
+			return res, nil
+		}
+	}
+	return first, nil
+}
 
-	return m.runner.Run(ctx, m.dir, cmd...)
+func (m *GenericManager) Init(ctx context.Context) (*Result, error) {
+	return m.run(ctx, "init", CommandInput{})
 }
 
 func (m *GenericManager) Install(ctx context.Context, opts InstallOptions) (*Result, error) {
-	input := CommandInput{
-		Args: map[string]string{},
+	return m.run(ctx, "install", CommandInput{
 		Flags: map[string]any{
 			"frozen":     opts.Frozen,
 			"clean":      opts.Clean,
 			"production": opts.Production,
 		},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "install", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	})
 }
 
 func (m *GenericManager) Add(ctx context.Context, pkg string, opts AddOptions) (*Result, error) {
 	input := CommandInput{
-		Args: map[string]string{
-			argPackage: pkg,
-		},
+		Args: map[string]string{argPackage: pkg},
 		Flags: map[string]any{
 			"dev":       opts.Dev,
 			"optional":  opts.Optional,
@@ -76,79 +82,30 @@ func (m *GenericManager) Add(ctx context.Context, pkg string, opts AddOptions) (
 			"workspace": opts.Workspace,
 		},
 	}
-
 	if opts.Version != "" {
 		input.Args["version"] = opts.Version
 	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "add", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "add", input)
 }
 
 func (m *GenericManager) Remove(ctx context.Context, pkg string) (*Result, error) {
-	input := CommandInput{
-		Args: map[string]string{
-			argPackage: pkg,
-		},
-		Flags: map[string]any{},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "remove", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "remove", CommandInput{Args: map[string]string{argPackage: pkg}})
 }
 
 func (m *GenericManager) List(ctx context.Context) (*Result, error) {
-	input := CommandInput{
-		Args:  map[string]string{},
-		Flags: map[string]any{},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "list", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "list", CommandInput{})
 }
 
 func (m *GenericManager) Outdated(ctx context.Context) (*Result, error) {
-	input := CommandInput{
-		Args:  map[string]string{},
-		Flags: map[string]any{},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "outdated", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "outdated", CommandInput{})
 }
 
 func (m *GenericManager) Update(ctx context.Context, pkg string) (*Result, error) {
-	input := CommandInput{
-		Args:  map[string]string{},
-		Flags: map[string]any{},
-	}
-
+	input := CommandInput{}
 	if pkg != "" {
-		input.Args[argPackage] = pkg
+		input.Args = map[string]string{argPackage: pkg}
 	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "update", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "update", input)
 }
 
 func (m *GenericManager) Supports(cap Capability) bool {
@@ -172,31 +129,11 @@ func (m *GenericManager) Capabilities() []Capability {
 }
 
 func (m *GenericManager) Vendor(ctx context.Context) (*Result, error) {
-	input := CommandInput{
-		Args:  map[string]string{},
-		Flags: map[string]any{},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "vendor", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "vendor", CommandInput{})
 }
 
 func (m *GenericManager) Resolve(ctx context.Context) (*Result, error) {
-	input := CommandInput{
-		Args:  map[string]string{},
-		Flags: map[string]any{},
-	}
-
-	cmd, err := m.translator.BuildCommand(m.def.Name, "resolve", input)
-	if err != nil {
-		return nil, err
-	}
-
-	return m.runner.Run(ctx, m.dir, cmd...)
+	return m.run(ctx, "resolve", CommandInput{})
 }
 
 func (m *GenericManager) Path(ctx context.Context, pkg string) (*PathResult, error) {
