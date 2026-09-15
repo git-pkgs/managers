@@ -329,6 +329,36 @@ func TestCargoAddVersion(t *testing.T) {
 	}
 }
 
+func TestVersionSuffixPackageNameCollision(t *testing.T) {
+	tr := loadTranslator(t)
+	cases := []struct {
+		manager string
+		pkg     string
+		version string
+		want    []string
+	}{
+		// crate name equal to the base subcommand
+		{"cargo", "add", "1.0", []string{"cargo", "add", "add@1.0"}},
+		// crate name equal to the binary
+		{"cargo", "cargo", "1.0", []string{"cargo", "add", "cargo@1.0"}},
+		// npm package name equal to the base subcommand
+		{"npm", "install", "2.0", []string{"npm", "install", "install@2.0"}},
+		// go module path equal to the base subcommand
+		{"gomod", "get", "v1.0.0", []string{"go", "get", "get@v1.0.0"}},
+	}
+	for _, tc := range cases {
+		got, err := tr.BuildCommand(tc.manager, "add", CommandInput{
+			Args: map[string]string{"package": tc.pkg, "version": tc.version},
+		})
+		if err != nil {
+			t.Fatalf("%s %s: %v", tc.manager, tc.pkg, err)
+		}
+		if !reflect.DeepEqual(got, tc.want) {
+			t.Errorf("%s %s: got %v, want %v", tc.manager, tc.pkg, got, tc.want)
+		}
+	}
+}
+
 func TestCargoAddDev(t *testing.T) {
 	tr := loadTranslator(t)
 	cmd, err := tr.BuildCommand("cargo", "add", CommandInput{
