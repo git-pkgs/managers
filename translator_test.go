@@ -315,6 +315,20 @@ func TestCargoAdd(t *testing.T) {
 	}
 }
 
+func TestCargoAddVersion(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("cargo", "add", CommandInput{
+		Args: map[string]string{"package": "serde", "version": "1.0.219"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"cargo", "add", "serde@1.0.219"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
 func TestCargoAddDev(t *testing.T) {
 	tr := loadTranslator(t)
 	cmd, err := tr.BuildCommand("cargo", "add", CommandInput{
@@ -393,6 +407,20 @@ func TestGomodAdd(t *testing.T) {
 		t.Fatalf("BuildCommand failed: %v", err)
 	}
 	expected := []string{"go", "get", "github.com/pkg/errors"}
+	if !reflect.DeepEqual(cmd, expected) {
+		t.Errorf("got %v, want %v", cmd, expected)
+	}
+}
+
+func TestGomodAddVersion(t *testing.T) {
+	tr := loadTranslator(t)
+	cmd, err := tr.BuildCommand("gomod", "add", CommandInput{
+		Args: map[string]string{"package": "github.com/pkg/errors", "version": "v0.9.1"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand failed: %v", err)
+	}
+	expected := []string{"go", "get", "github.com/pkg/errors@v0.9.1"}
 	if !reflect.DeepEqual(cmd, expected) {
 		t.Errorf("got %v, want %v", cmd, expected)
 	}

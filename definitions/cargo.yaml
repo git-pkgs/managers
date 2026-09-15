@@ -42,6 +42,7 @@ commands:
     args:
       # cargo add supports package@version syntax
       package: {position: 0, required: true, validate: cargo_crate}
+      version: {position: 0, suffix: "@", required: false}
     flags:
       dev: [--dev]
       build: [--build]
