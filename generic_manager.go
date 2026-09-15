@@ -34,9 +34,9 @@ func (m *GenericManager) Warnings() []string {
 
 // run builds the command chain for an operation (base command plus any
 // then: entries) and executes them in order. It returns the first
-// command's result when the whole chain succeeds. When a command fails,
-// either as a Go error or a non-zero exit, execution stops and that
-// command's result is returned so callers see what failed.
+// command's result with subsequent results attached in Then. Execution
+// stops after the first non-zero exit; Success() on the returned result
+// reflects the whole chain.
 func (m *GenericManager) run(ctx context.Context, operation string, input CommandInput) (*Result, error) {
 	cmds, err := m.translator.BuildCommands(m.def.Name, operation, input)
 	if err != nil {
@@ -45,14 +45,16 @@ func (m *GenericManager) run(ctx context.Context, operation string, input Comman
 	var first *Result
 	for i, cmd := range cmds {
 		res, err := m.runner.Run(ctx, m.dir, cmd...)
-		if err != nil {
-			return res, err
-		}
 		if i == 0 {
 			first = res
+		} else if first != nil {
+			first.Then = append(first.Then, res)
 		}
-		if !res.Success() {
-			return res, nil
+		if err != nil {
+			return first, err
+		}
+		if res.ExitCode != 0 {
+			return first, nil
 		}
 	}
 	return first, nil

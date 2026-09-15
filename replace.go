@@ -95,21 +95,22 @@ func (m *GenericManager) Replace(ctx context.Context, pkg string, opts ReplaceOp
 		return nil, err
 	}
 
-	var result *Result
+	var first *Result
 	for _, in := range inputs {
-		cmd, err := m.translator.BuildCommand(m.def.Name, in.operation, in.input)
-		if err != nil {
-			return nil, err
+		res, err := m.run(ctx, in.operation, in.input)
+		if first == nil {
+			first = res
+		} else if res != nil {
+			first.Then = append(first.Then, res)
 		}
-		result, err = m.runner.Run(ctx, m.dir, cmd...)
 		if err != nil {
-			return result, err
+			return first, err
 		}
-		if result.ExitCode != 0 {
-			return result, nil
+		if res != nil && !res.Success() {
+			return first, nil
 		}
 	}
-	return result, nil
+	return first, nil
 }
 
 type replaceInput struct {
