@@ -47,13 +47,13 @@ func (m *GenericManager) run(ctx context.Context, operation string, input Comman
 		res, err := m.runner.Run(ctx, m.dir, cmd...)
 		if i == 0 {
 			first = res
-		} else if first != nil {
+		} else if first != nil && res != nil {
 			first.Then = append(first.Then, res)
 		}
 		if err != nil {
 			return first, err
 		}
-		if res.ExitCode != 0 {
+		if res == nil || res.ExitCode != 0 {
 			return first, nil
 		}
 	}

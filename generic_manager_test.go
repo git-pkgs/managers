@@ -88,6 +88,30 @@ func TestGenericManager_Add_RunsThenChain(t *testing.T) {
 	}
 }
 
+func TestGenericManager_Add_ChainNilFollowupError(t *testing.T) {
+	// A Runner that returns (nil, err) for the second call, as
+	// PolicyRunner does on a policy violation.
+	runner := NewMockRunner()
+	runner.Results = []*Result{{Command: []string{"go", "get", "x"}, ExitCode: 0}}
+	runner.Errors = []error{nil, errors.New("policy denied")}
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "example.com/x", AddOptions{})
+	if err == nil {
+		t.Fatal("expected error from follow-up")
+	}
+	if res == nil {
+		t.Fatal("expected first command's result")
+	}
+	for _, th := range res.Then {
+		if th == nil {
+			t.Fatal("Then must not contain nil entries")
+		}
+	}
+	// Success() must not panic; its value is not asserted since the
+	// failure is signalled via the returned error, not the Result.
+	_ = res.Success()
+}
+
 func TestGenericManager_Add_ChainStopsOnFailure(t *testing.T) {
 	runner := NewMockRunner()
 	runner.Results = []*Result{
