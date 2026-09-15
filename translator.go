@@ -186,6 +186,7 @@ func (t *Translator) processArg(name string, argDef definitions.Arg, input Comma
 	switch {
 	case argDef.Flag != "":
 		*args = append(*args, argDef.Flag, val)
+		at = len(*args) - 1
 	case argDef.FixedSuffix != "":
 		*args = append(*args, val+argDef.FixedSuffix)
 	case argDef.Suffix != "" && name == "version":

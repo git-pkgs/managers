@@ -329,6 +329,33 @@ func TestCargoAddVersion(t *testing.T) {
 	}
 }
 
+func TestVersionSuffixOnFlaggedPackage(t *testing.T) {
+	tr := NewTranslator()
+	tr.Register(&definitions.Definition{
+		Name:   "flagpkg",
+		Binary: "tool",
+		Commands: map[string]definitions.Command{
+			"add": {
+				Base: []string{"add"},
+				Args: map[string]definitions.Arg{
+					"package": {Flag: "--package", Required: true},
+					"version": {Suffix: "@"},
+				},
+			},
+		},
+	})
+	got, err := tr.BuildCommand("flagpkg", "add", CommandInput{
+		Args: map[string]string{"package": "foo", "version": "1.0"},
+	})
+	if err != nil {
+		t.Fatalf("BuildCommand: %v", err)
+	}
+	want := []string{"tool", "add", "--package", "foo@1.0"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
 func TestVersionSuffixPackageNameCollision(t *testing.T) {
 	tr := loadTranslator(t)
 	cases := []struct {
