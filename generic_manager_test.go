@@ -20,6 +20,47 @@ func newTestManager(def *definitions.Definition, runner *MockRunner) *GenericMan
 	}
 }
 
+func embeddedDef(t *testing.T, name string) *definitions.Definition {
+	t.Helper()
+	defs, err := definitions.LoadEmbedded()
+	if err != nil {
+		t.Fatalf("LoadEmbedded: %v", err)
+	}
+	for _, d := range defs {
+		if d.Name == name {
+			return d
+		}
+	}
+	t.Fatalf("no embedded definition %q", name)
+	return nil
+}
+
+func TestGenericManager_Add_GomodVersion(t *testing.T) {
+	runner := NewMockRunner()
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	_, err := mgr.Add(context.Background(), "github.com/pkg/errors", AddOptions{Version: "v0.9.1"})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	want := []string{"go", "get", "github.com/pkg/errors@v0.9.1"}
+	if !slicesEqual(runner.Captured[0], want) {
+		t.Errorf("got %v, want %v", runner.Captured[0], want)
+	}
+}
+
+func TestGenericManager_Add_CargoVersion(t *testing.T) {
+	runner := NewMockRunner()
+	mgr := newTestManager(embeddedDef(t, "cargo"), runner)
+	_, err := mgr.Add(context.Background(), "serde", AddOptions{Version: "1.0.219"})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	want := []string{"cargo", "add", "serde@1.0.219"}
+	if !slicesEqual(runner.Captured[0], want) {
+		t.Errorf("got %v, want %v", runner.Captured[0], want)
+	}
+}
+
 func TestGenericManager_Path_Raw(t *testing.T) {
 	def := &definitions.Definition{
 		Name:   "testpkg",

@@ -153,6 +153,7 @@ func TestPackageBlocklistPolicy(t *testing.T) {
 		{"blocked package", []string{"evil-package"}, false},
 		{"mixed packages", []string{"lodash", "deprecated-lib"}, false},
 		{"empty packages", []string{}, true},
+		{"versioned blocked", []string{"evil-package@1.2.3"}, false},
 	}
 
 	for _, tt := range tests {
@@ -166,6 +167,32 @@ func TestPackageBlocklistPolicy(t *testing.T) {
 				t.Errorf("got allowed=%v, want %v", result.Allowed, tt.allowed)
 			}
 		})
+	}
+}
+
+func TestPackageBlocklistScopedAndVersioned(t *testing.T) {
+	policy := PackageBlocklistPolicy{
+		Blocked: map[string]string{
+			"@scope/name":        "scoped bare",
+			"github.com/org/mod": "go module",
+		},
+	}
+	cases := []struct {
+		pkg     string
+		allowed bool
+	}{
+		{"@scope/name", false},
+		{"@scope/name@7.0.0", false},
+		{"@scope/other", true},
+		{"github.com/org/mod@v1.2.3", false},
+		{"github.com/org/mod", false},
+		{"github.com/org/other@v1.0.0", true},
+	}
+	for _, tc := range cases {
+		res, _ := policy.Check(context.Background(), &PolicyOperation{Packages: []string{tc.pkg}})
+		if res.Allowed != tc.allowed {
+			t.Errorf("%s: allowed=%v, want %v", tc.pkg, res.Allowed, tc.allowed)
+		}
 	}
 }
 
@@ -193,6 +220,12 @@ func TestPackageBlocklistViaRunner(t *testing.T) {
 	_, err = pr.Run(context.Background(), "/tmp", "npm", "install", "lodash")
 	if err != nil {
 		t.Fatalf("allowed package should pass: %v", err)
+	}
+
+	// A versioned form of a blocked package must also be denied.
+	_, err = pr.Run(context.Background(), "/tmp", "go", "get", "evil-package@v1.2.3")
+	if err == nil {
+		t.Fatal("expected blocklist policy to deny versioned package")
 	}
 }
 

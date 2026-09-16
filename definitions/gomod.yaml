@@ -41,6 +41,7 @@ commands:
     base: [get]
     args:
       package: {position: 0, required: true, validate: go_module}
+      version: {position: 0, suffix: "@", required: false}
     flags:
       # -t includes test dependencies
       test: [-t]

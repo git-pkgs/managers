@@ -93,14 +93,16 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 
 	baseOverrideUsed := t.applyBaseOverrides(&args, cmd, input)
 
-	packageVal := input.Args["package"]
-
 	sortedArgs := t.sortArgs(cmd)
 
+	packageIdx := -1
 	for _, entry := range sortedArgs {
-		val, err := t.processArg(entry.name, entry.argDef, input, &args)
+		val, at, err := t.processArg(entry.name, entry.argDef, input, &args)
 		if err != nil {
 			return nil, err
+		}
+		if entry.name == "package" {
+			packageIdx = at
 		}
 		if val == "" {
 			continue
@@ -110,7 +112,7 @@ func (t *Translator) buildSingleCommand(binary string, cmd definitions.Command, 
 		}
 	}
 
-	t.applyVersionSuffix(&args, cmd, input, packageVal)
+	t.applyVersionSuffix(&args, cmd, input, packageIdx)
 
 	if !suppressDefaultFlags {
 		args = append(args, cmd.DefaultFlags...)
@@ -158,40 +160,52 @@ func (t *Translator) sortArgs(cmd definitions.Command) []argEntry {
 	return sorted
 }
 
-func (t *Translator) processArg(name string, argDef definitions.Arg, input CommandInput, args *[]string) (string, error) {
+// processArg appends the argument to args and returns the value, the index
+// at which the value was appended (or -1 when nothing was appended or the
+// value is not a standalone positional), and any validation error.
+func (t *Translator) processArg(name string, argDef definitions.Arg, input CommandInput, args *[]string) (string, int, error) {
 	val, provided := input.Args[name]
 	if !provided {
 		if argDef.Required && !argDef.ExtractionOnly {
-			return "", ErrMissingArgument{Argument: name}
+			return "", -1, ErrMissingArgument{Argument: name}
 		}
-		return "", nil
+		return "", -1, nil
 	}
 
 	if argDef.ExtractionOnly {
-		return "", nil
+		return "", -1, nil
 	}
 
 	if argDef.Validate != "" {
 		if err := t.validate(argDef.Validate, val); err != nil {
-			return "", err
+			return "", -1, err
 		}
 	}
 
+	at := -1
 	switch {
 	case argDef.Flag != "":
 		*args = append(*args, argDef.Flag, val)
+		at = len(*args) - 1
 	case argDef.FixedSuffix != "":
 		*args = append(*args, val+argDef.FixedSuffix)
 	case argDef.Suffix != "" && name == "version":
 		// Handled in applyVersionSuffix
 	default:
 		*args = append(*args, val)
+		at = len(*args) - 1
 	}
 
-	return val, nil
+	return val, at, nil
 }
 
-func (t *Translator) applyVersionSuffix(args *[]string, cmd definitions.Command, input CommandInput, packageVal string) {
+// applyVersionSuffix appends the version to the package argument in place.
+// packageIdx is the index into args where the package positional was
+// written; a negative value means no package positional was appended.
+func (t *Translator) applyVersionSuffix(args *[]string, cmd definitions.Command, input CommandInput, packageIdx int) {
+	if packageIdx < 0 || packageIdx >= len(*args) {
+		return
+	}
 	versionDef, hasVersion := cmd.Args["version"]
 	if !hasVersion || versionDef.Suffix == "" {
 		return
@@ -200,12 +214,7 @@ func (t *Translator) applyVersionSuffix(args *[]string, cmd definitions.Command,
 	if !hasVersionVal {
 		return
 	}
-	for i, a := range *args {
-		if a == packageVal {
-			(*args)[i] = a + versionDef.Suffix + version
-			break
-		}
-	}
+	(*args)[packageIdx] += versionDef.Suffix + version
 }
 
 func (t *Translator) applyUserFlags(args *[]string, cmd definitions.Command, input CommandInput, baseOverrideUsed string) {
