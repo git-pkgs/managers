@@ -61,6 +61,151 @@ func TestGenericManager_Add_CargoVersion(t *testing.T) {
 	}
 }
 
+func TestGenericManager_Add_RunsThenChain(t *testing.T) {
+	runner := NewMockRunner()
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "github.com/pkg/errors", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	if len(runner.Captured) != 2 {
+		t.Fatalf("captured %d commands, want 2 (go get + go mod tidy)", len(runner.Captured))
+	}
+	if !slicesEqual(runner.Captured[0], []string{"go", "get", "github.com/pkg/errors"}) {
+		t.Errorf("cmd[0] = %v", runner.Captured[0])
+	}
+	if !slicesEqual(runner.Captured[1], []string{"go", "mod", "tidy"}) {
+		t.Errorf("cmd[1] = %v", runner.Captured[1])
+	}
+	if !slicesEqual(res.Command, runner.Captured[0]) {
+		t.Errorf("res.Command = %v, want the primary go get", res.Command)
+	}
+	if len(res.Then) != 1 || !slicesEqual(res.Then[0].Command, runner.Captured[1]) {
+		t.Errorf("res.Then = %+v, want the go mod tidy result", res.Then)
+	}
+	if !res.Success() {
+		t.Error("Success() should be true when all chain commands exit zero")
+	}
+}
+
+func TestGenericManager_Add_ChainNilFollowupError(t *testing.T) {
+	// A Runner that returns (nil, err) for the second call, as
+	// PolicyRunner does on a policy violation.
+	runner := NewMockRunner()
+	runner.Results = []*Result{{Command: []string{"go", "get", "x"}, ExitCode: 0}}
+	runner.Errors = []error{nil, errors.New("policy denied")}
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "example.com/x", AddOptions{})
+	if err == nil {
+		t.Fatal("expected error from follow-up")
+	}
+	if res == nil {
+		t.Fatal("expected first command's result")
+	}
+	for _, th := range res.Then {
+		if th == nil {
+			t.Fatal("Then must not contain nil entries")
+		}
+	}
+	// Success() must not panic; its value is not asserted since the
+	// failure is signalled via the returned error, not the Result.
+	_ = res.Success()
+}
+
+func TestGenericManager_Add_ChainStopsOnFailure(t *testing.T) {
+	runner := NewMockRunner()
+	runner.Results = []*Result{
+		{Command: []string{"go", "get", "x"}, ExitCode: 1, Stderr: "boom"},
+	}
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "example.com/x", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	if res.Success() {
+		t.Error("Success() should be false when first command exits non-zero")
+	}
+	if len(runner.Captured) != 1 {
+		t.Errorf("captured %d commands, want 1 (chain should stop)", len(runner.Captured))
+	}
+}
+
+func TestGenericManager_Add_ChainThenFails(t *testing.T) {
+	runner := NewMockRunner()
+	runner.Results = []*Result{
+		{Command: []string{"go", "get", "x"}, ExitCode: 0},
+		{Command: []string{"go", "mod", "tidy"}, ExitCode: 1, Stderr: "tidy failed"},
+	}
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Add(context.Background(), "example.com/x", AddOptions{})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	if res.Success() {
+		t.Error("Success() should be false when a then: command exits non-zero")
+	}
+	if !slicesEqual(res.Command, []string{"go", "get", "x"}) {
+		t.Errorf("res.Command = %v, want the primary command", res.Command)
+	}
+	if len(res.Then) != 1 {
+		t.Fatalf("res.Then = %d, want 1", len(res.Then))
+	}
+	if res.Then[0].ExitCode != 1 || res.Then[0].Stderr != "tidy failed" {
+		t.Errorf("res.Then[0] = %+v", res.Then[0])
+	}
+}
+
+func TestGenericManager_Replace_RunsChain(t *testing.T) {
+	runner := NewMockRunner()
+	mgr := newTestManager(embeddedDef(t, "gomod"), runner)
+	res, err := mgr.Replace(context.Background(), "example.com/x", ReplaceOptions{Path: "../x"})
+	if err != nil {
+		t.Fatalf("Replace: %v", err)
+	}
+	// gomod Replace runs `go mod edit -replace ...` then `go mod tidy`
+	// as two separate operations; both must be reachable via Then.
+	if len(runner.Captured) != 2 {
+		t.Fatalf("captured %d commands, want 2", len(runner.Captured))
+	}
+	if !slicesEqual(runner.Captured[1], []string{"go", "mod", "tidy"}) {
+		t.Errorf("cmd[1] = %v, want go mod tidy", runner.Captured[1])
+	}
+	if len(res.Then) != 1 || !slicesEqual(res.Then[0].Command, runner.Captured[1]) {
+		t.Errorf("res.Then = %+v, want the tidy result", res.Then)
+	}
+}
+
+func TestGenericManager_Replace_RunsOperationThen(t *testing.T) {
+	// A synthetic definition where the replace operation itself has a
+	// then: entry, to prove Replace routes through the chain executor.
+	def := &definitions.Definition{
+		Name:   "gomod",
+		Binary: "go",
+		Commands: map[string]definitions.Command{
+			"replace": {
+				Base: []string{"mod", "edit"},
+				Args: map[string]definitions.Arg{"spec": {Flag: "-replace"}},
+				Then: []definitions.Command{{Base: []string{"post"}}},
+			},
+			"tidy": {Base: []string{"mod", "tidy"}},
+		},
+		Capabilities: []string{"replace_path"},
+	}
+	runner := NewMockRunner()
+	mgr := newTestManager(def, runner)
+	_, err := mgr.Replace(context.Background(), "example.com/x", ReplaceOptions{Path: "../x"})
+	if err != nil {
+		t.Fatalf("Replace: %v", err)
+	}
+	// replace + its then: (post) + tidy = 3
+	if len(runner.Captured) != 3 {
+		t.Fatalf("captured %d commands, want 3: %v", len(runner.Captured), runner.Captured)
+	}
+	if !slicesEqual(runner.Captured[1], []string{"go", "post"}) {
+		t.Errorf("then: command not run: %v", runner.Captured)
+	}
+}
+
 func TestGenericManager_Path_Raw(t *testing.T) {
 	def := &definitions.Definition{
 		Name:   "testpkg",

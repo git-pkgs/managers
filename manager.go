@@ -58,10 +58,24 @@ type Result struct {
 	Duration time.Duration
 	Cwd      string
 	Context  ExecContext
+	// Then holds the results of any follow-up commands the operation
+	// ran after this one, in order. It is empty for single-command
+	// operations and when this command failed.
+	Then []*Result
 }
 
+// Success reports whether this command and every follow-up in Then
+// exited zero.
 func (r *Result) Success() bool {
-	return r.ExitCode == 0
+	if r.ExitCode != 0 {
+		return false
+	}
+	for _, t := range r.Then {
+		if !t.Success() {
+			return false
+		}
+	}
+	return true
 }
 
 type PathResult struct {
