@@ -16,6 +16,10 @@ detection:
     - composer.json
   priority: 10
 
+version_detection:
+  command: [--version]
+  pattern: '^Composer version (\S+)'
+
 commands:
   init:
     base: [init, -n]
@@ -92,7 +96,7 @@ commands:
 
   resolve:
     base: [show]
-    default_flags: [--tree]
+    default_flags: [--tree, --format=json]
     exit_codes:
       0: success
       1: error
