@@ -378,3 +378,7 @@ runner.Run(ctx, cmd, opts)
 // Read new state
 deps = manifests.Parse("Gemfile.lock")
 ```
+
+## License
+
+[MIT](LICENSE).
