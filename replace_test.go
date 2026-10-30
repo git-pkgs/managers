@@ -393,6 +393,85 @@ func TestReplaceGemfileAppendsMissingGem(t *testing.T) {
 	}
 }
 
+func TestReplaceGemfileQuotesReplacementValues(t *testing.T) {
+	tests := []struct {
+		name   string
+		value  string
+		quoted string
+	}{
+		{"expression", `../#{raise('interpolated')}`, `"../\#{raise('interpolated')}"`},
+		{"variables", `../#@path/#@@path/#$path`, `"../\#@path/\#@@path/\#$path"`},
+		{"quotes and backslashes", `../a\"b'c`, `"../a\\\"b'c"`},
+		{"backslash before interpolation", `../\#{1+1}`, `"../\\\#{1+1}"`},
+		{"controls", "../\x00\a\b\t\n\v\f\r\x1b\x7f", `"../\x00\x07\x08\x09\x0a\x0b\x0c\x0d\x1b\x7f"`},
+		{"unicode", "../é\U000e0001", `"../\xc3\xa9\xf3\xa0\x80\x81"`},
+		{"invalid UTF-8", "../\xff", `"../\xff"`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, variant := range []struct {
+				name    string
+				initial string
+				git     bool
+			}{
+				{"path/append", "", false},
+				{"path/edit", "gem \"rake\"\n", false},
+				{"git/append", "", true},
+				{"git/edit", "gem \"rake\"\n", true},
+			} {
+				t.Run(variant.name, func(t *testing.T) {
+					dir := t.TempDir()
+					gemfile := filepath.Join(dir, "Gemfile")
+					writeFile(t, gemfile, variant.initial)
+					mgr := newReplaceTestManager(t, "bundler", dir, NewMockRunner())
+					opts := ReplaceOptions{Path: tt.value}
+					want := `gem "rake", path: ` + tt.quoted + "\n"
+					if variant.git {
+						opts = ReplaceOptions{Git: tt.value, Ref: tt.value}
+						want = `gem "rake", git: ` + tt.quoted + ", branch: " + tt.quoted + "\n"
+					}
+					_, err := mgr.Replace(context.Background(), "rake", opts)
+					if err != nil {
+						t.Fatalf("Replace: %v", err)
+					}
+					if got := readFile(t, gemfile); got != want {
+						t.Fatalf("Gemfile = %q, want %q", got, want)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestReplaceGemfileQuotesGemName(t *testing.T) {
+	const pkg = `rake#{raise('interpolated')}`
+	tests := []struct {
+		name    string
+		initial string
+		opts    ReplaceOptions
+		want    string
+	}{
+		{"append", "", ReplaceOptions{Path: "../rake"}, `gem "rake\#{raise('interpolated')}", path: "../rake"` + "\n"},
+		{"edit", "gem '" + pkg + "'\n", ReplaceOptions{Path: "../rake"}, `gem "rake\#{raise('interpolated')}", path: "../rake"` + "\n"},
+		{"drop", "gem '" + pkg + "', path: '../rake'\n", ReplaceOptions{Drop: true}, `gem "rake\#{raise('interpolated')}"` + "\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			gemfile := filepath.Join(dir, "Gemfile")
+			writeFile(t, gemfile, tt.initial)
+			mgr := newReplaceTestManager(t, "bundler", dir, NewMockRunner())
+			_, err := mgr.Replace(context.Background(), pkg, tt.opts)
+			if err != nil {
+				t.Fatalf("Replace: %v", err)
+			}
+			if got := readFile(t, gemfile); got != tt.want {
+				t.Fatalf("Gemfile = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestUpdateTOMLSectionEntry(t *testing.T) {
 	in := "[patch.crates-io] # local overrides\nfoo = { path = \"../foo\" }\n\n[other]\nx = 1\n"
 
