@@ -2,6 +2,7 @@ package managers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -223,6 +224,34 @@ func TestReplaceComposerGitRefRunsRequire(t *testing.T) {
 	wantRequire := []string{"composer", "require", "vendor/pkg:dev-feature", "--no-update"}
 	if !reflect.DeepEqual(runner.Captured[1], wantRequire) {
 		t.Errorf("require: got %v, want %v", runner.Captured[1], wantRequire)
+	}
+}
+
+func TestReplaceComposerPayloadIsJSON(t *testing.T) {
+	values := []string{
+		`../a"b\c`,
+		"../\x00\a\v\x1b\x7f",
+		"../é\U000e0001",
+		"https://example.com/pkg?a=1&b=<2>",
+	}
+	for _, value := range values {
+		for _, opts := range []ReplaceOptions{{Path: value}, {Git: value}} {
+			runner := NewMockRunner()
+			mgr := newReplaceTestManager(t, "composer", "/test/dependent", runner)
+			if _, err := mgr.Replace(context.Background(), "vendor/pkg", opts); err != nil {
+				t.Fatalf("Replace: %v", err)
+			}
+			payload := runner.Captured[0][3]
+			var got struct {
+				URL string `json:"url"`
+			}
+			if err := json.Unmarshal([]byte(payload), &got); err != nil {
+				t.Fatalf("payload %q is not JSON: %v", payload, err)
+			}
+			if got.URL != value {
+				t.Errorf("payload url = %q, want %q", got.URL, value)
+			}
+		}
 	}
 }
 
