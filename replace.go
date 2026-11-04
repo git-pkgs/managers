@@ -1,7 +1,9 @@
 package managers
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -183,9 +185,17 @@ func buildComposerReplaceInputs(pkg string, mode replaceMode, opts ReplaceOption
 	}
 	switch mode {
 	case replaceModePath:
-		input.Args["payload"] = fmt.Sprintf(`{"type":"path","url":%q}`, opts.Path)
+		payload, err := composerRepositoryPayload("path", opts.Path)
+		if err != nil {
+			return nil, err
+		}
+		input.Args["payload"] = payload
 	case replaceModeGit:
-		input.Args["payload"] = fmt.Sprintf(`{"type":"vcs","url":%q}`, opts.Git)
+		payload, err := composerRepositoryPayload("vcs", opts.Git)
+		if err != nil {
+			return nil, err
+		}
+		input.Args["payload"] = payload
 		inputs := []replaceInput{{operation: opReplace, input: input}}
 		if opts.Ref != "" {
 			inputs = append(inputs, replaceInput{
@@ -203,6 +213,20 @@ func buildComposerReplaceInputs(pkg string, mode replaceMode, opts ReplaceOption
 	}
 	input.Extra = opts.Extra
 	return []replaceInput{{operation: opReplace, input: input}}, nil
+}
+
+func composerRepositoryPayload(kind, url string) (string, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	err := enc.Encode(struct {
+		Type string `json:"type"`
+		URL  string `json:"url"`
+	}{kind, url})
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSuffix(buf.String(), "\n"), nil
 }
 
 func (m *GenericManager) replaceInManifest(file, pkg string, mode replaceMode, opts ReplaceOptions) (*Result, error) {

@@ -183,7 +183,7 @@ func editGemfileReplaceEntry(path, pkg string, mode replaceMode, opts ReplaceOpt
 		if mode == replaceModeDrop {
 			return fmt.Errorf("gem %q not found in Gemfile", pkg)
 		}
-		lines = append(lines, fmt.Sprintf("gem %q%s\n", pkg, gemReplacementSuffix(mode, opts)))
+		lines = append(lines, fmt.Sprintf("gem %s%s\n", quoteRubyString(pkg), gemReplacementSuffix(mode, opts)))
 	}
 
 	return os.WriteFile(path, []byte(strings.Join(lines, "")), manifestPerm)
@@ -208,31 +208,53 @@ func updateGemfileLine(line, pkg string, mode replaceMode, opts ReplaceOptions) 
 
 	switch mode {
 	case replaceModePath:
-		args = append(args, fmt.Sprintf("path: %q", opts.Path))
+		args = append(args, "path: "+quoteRubyString(opts.Path))
 	case replaceModeGit:
-		args = append(args, fmt.Sprintf("git: %q", opts.Git))
+		args = append(args, "git: "+quoteRubyString(opts.Git))
 		if opts.Ref != "" {
-			args = append(args, fmt.Sprintf("branch: %q", opts.Ref))
+			args = append(args, "branch: "+quoteRubyString(opts.Ref))
 		}
 	case replaceModeDrop:
 	}
 
-	return fmt.Sprintf("%sgem %q%s%s", indent, pkg, formatGemfileArgs(args, comment), newline), nil
+	return fmt.Sprintf("%sgem %s%s%s", indent, quoteRubyString(pkg), formatGemfileArgs(args, comment), newline), nil
 }
 
 func gemReplacementSuffix(mode replaceMode, opts ReplaceOptions) string {
 	switch mode {
 	case replaceModePath:
-		return fmt.Sprintf(", path: %q", opts.Path)
+		return ", path: " + quoteRubyString(opts.Path)
 	case replaceModeGit:
-		s := fmt.Sprintf(", git: %q", opts.Git)
+		s := ", git: " + quoteRubyString(opts.Git)
 		if opts.Ref != "" {
-			s += fmt.Sprintf(", branch: %q", opts.Ref)
+			s += ", branch: " + quoteRubyString(opts.Ref)
 		}
 		return s
 	default:
 		return ""
 	}
+}
+
+func quoteRubyString(s string) string {
+	var quoted strings.Builder
+	quoted.WriteByte('"')
+	for i := range len(s) {
+		c := s[i]
+		switch c {
+		case '\\', '"', '#':
+			quoted.WriteByte('\\')
+			quoted.WriteByte(c)
+		default:
+			if c < ' ' || c >= '\x7f' {
+				// Byte escapes preserve invalid UTF-8 and avoid Go-only Unicode escapes.
+				fmt.Fprintf(&quoted, `\x%02x`, c)
+			} else {
+				quoted.WriteByte(c)
+			}
+		}
+	}
+	quoted.WriteByte('"')
+	return quoted.String()
 }
 
 func parseGemfileArgs(tail string) ([]string, string) {
