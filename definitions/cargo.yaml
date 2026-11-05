@@ -11,6 +11,8 @@ detection:
     - Cargo.lock
   manifests:
     - Cargo.toml
+  default: true
+  ecosystem_order: 30
   priority: 10
 
 version_detection:

@@ -10,6 +10,8 @@ detection:
     - cpanfile
     - Makefile.PL
     - Build.PL
+  default: true
+  ecosystem_order: 200
   priority: 10
 
 version_detection:

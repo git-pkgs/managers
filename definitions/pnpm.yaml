@@ -11,6 +11,7 @@ detection:
     - pnpm-lock.yaml
   manifests:
     - package.json
+  ecosystem_order: 10
   priority: 20  # higher than npm when pnpm-lock.yaml present
 
 version_detection:

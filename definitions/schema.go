@@ -15,10 +15,12 @@ type Definition struct {
 }
 
 type Detection struct {
-	Lockfiles  []string    `yaml:"lockfiles,omitempty"`
-	Manifests  []string    `yaml:"manifests,omitempty"`
-	Priority   int         `yaml:"priority"`
-	FileChecks []FileCheck `yaml:"file_checks,omitempty"`
+	Lockfiles      []string    `yaml:"lockfiles,omitempty"`
+	Manifests      []string    `yaml:"manifests,omitempty"`
+	Priority       int         `yaml:"priority"`
+	Default        bool        `yaml:"default,omitempty"`
+	EcosystemOrder int         `yaml:"ecosystem_order,omitempty"`
+	FileChecks     []FileCheck `yaml:"file_checks,omitempty"`
 }
 
 type FileCheck struct {

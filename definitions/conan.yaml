@@ -9,6 +9,8 @@ detection:
   manifests:
     - conanfile.txt
     - conanfile.py
+  default: true
+  ecosystem_order: 170
   priority: 10
 
 version_detection:

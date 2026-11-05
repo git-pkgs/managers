@@ -14,6 +14,8 @@ detection:
     - mix.lock
   manifests:
     - mix.exs
+  default: true
+  ecosystem_order: 70
   priority: 10
 
 commands:

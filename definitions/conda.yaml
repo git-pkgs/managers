@@ -9,6 +9,8 @@ detection:
   manifests:
     - environment.yml
     - environment.yaml
+  default: true
+  ecosystem_order: 270
   priority: 10
 
 version_detection:

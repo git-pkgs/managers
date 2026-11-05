@@ -1,5 +1,5 @@
 name: gomod
-ecosystem: golang
+ecosystem: go
 binary: go
 version: ">=1.18"
 status: current
@@ -7,10 +7,10 @@ min_tested: "1.18"
 max_tested: "1.24.0"
 
 detection:
-  lockfiles:
-    - go.sum
   manifests:
     - go.mod
+  default: true
+  ecosystem_order: 40
   priority: 10
 
 version_detection:

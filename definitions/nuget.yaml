@@ -6,10 +6,14 @@ version: ">=6.0.0"
 detection:
   lockfiles:
     - packages.lock.json
+    - project.assets.json
   manifests:
     - "*.csproj"
     - "*.fsproj"
     - "*.vbproj"
+    - packages.config
+  default: true
+  ecosystem_order: 110
   priority: 10
 
 version_detection:

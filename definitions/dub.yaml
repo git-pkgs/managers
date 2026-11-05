@@ -1,0 +1,15 @@
+name: dub
+ecosystem: dub
+binary: dub
+status: detection-only
+
+detection:
+  manifests:
+    - dub.json
+    - dub.sdl
+  default: true
+  ecosystem_order: 240
+  priority: 10
+
+commands: {}
+capabilities: []

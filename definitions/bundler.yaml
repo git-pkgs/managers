@@ -1,5 +1,5 @@
 name: bundler
-ecosystem: gem
+ecosystem: rubygems
 binary: bundle
 version: ">=2.0.0"
 status: current
@@ -11,6 +11,8 @@ detection:
     - Gemfile.lock
   manifests:
     - Gemfile
+  default: true
+  ecosystem_order: 20
   priority: 10
 
 version_detection:

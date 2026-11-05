@@ -4,10 +4,10 @@ binary: vcpkg
 version: ">=2021.05.12"
 
 detection:
-  lockfiles:
-    - vcpkg.json
   manifests:
     - vcpkg.json
+  default: true
+  ecosystem_order: 180
   priority: 10
 
 version_detection:

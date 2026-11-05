@@ -14,6 +14,8 @@ detection:
     - composer.lock
   manifests:
     - composer.json
+  default: true
+  ecosystem_order: 60
   priority: 10
 
 commands:

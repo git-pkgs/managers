@@ -10,6 +10,7 @@ detection:
     - requirements.in
     - setup.py
     - setup.cfg
+  ecosystem_order: 50
   priority: 5
 
 version_detection:

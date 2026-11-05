@@ -18,6 +18,8 @@ detection:
   file_checks:
     - file: .Rprofile
       match: 'renv/activate'
+  default: true
+  ecosystem_order: 210
   priority: 10
 
 version_detection:

@@ -124,7 +124,7 @@ func (m *GenericManager) buildReplaceInputs(pkg string, mode replaceMode, opts R
 	switch m.def.Name {
 	case "gomod":
 		return buildGoReplaceInputs(pkg, mode, opts)
-	case "npm", "pnpm", "yarn", "bun":
+	case npmManagerName, "pnpm", "yarn", "bun":
 		return buildNPMReplaceInputs(m.def.Name, pkg, mode, opts)
 	case "composer":
 		return buildComposerReplaceInputs(pkg, mode, opts)
