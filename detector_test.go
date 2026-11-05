@@ -83,6 +83,45 @@ func TestDetectorDetectFSChecksFileContents(t *testing.T) {
 	}
 }
 
+func TestDetectorDetectFSSkipsDanglingFileCheckSymlink(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/package-lock.json", []byte(`{"lockfileVersion":3}`), 0o600); err != nil {
+		t.Fatalf("write package-lock.json: %v", err)
+	}
+	if err := os.Symlink("missing", dir+"/pyproject.toml"); err != nil {
+		t.Fatalf("symlink pyproject.toml: %v", err)
+	}
+
+	got, err := newEmbeddedDetector(t).DetectFS(os.DirFS(dir), ".", FileDetectOptions{})
+	if err != nil {
+		t.Fatalf("DetectFS: %v", err)
+	}
+	if got.Manager != "npm" {
+		t.Fatalf("manager = %q, want %q", got.Manager, "npm")
+	}
+}
+
+func TestDetectorDetectFSSkipsDanglingNestedManifestSymlink(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/package-lock.json", []byte(`{"lockfileVersion":3}`), 0o600); err != nil {
+		t.Fatalf("write package-lock.json: %v", err)
+	}
+	if err := os.Mkdir(dir+"/project", 0o700); err != nil {
+		t.Fatalf("mkdir project: %v", err)
+	}
+	if err := os.Symlink("missing", dir+"/project/build.properties"); err != nil {
+		t.Fatalf("symlink project/build.properties: %v", err)
+	}
+
+	got, err := newEmbeddedDetector(t).DetectFS(os.DirFS(dir), ".", FileDetectOptions{})
+	if err != nil {
+		t.Fatalf("DetectFS: %v", err)
+	}
+	if got.Manager != "npm" {
+		t.Fatalf("manager = %q, want %q", got.Manager, "npm")
+	}
+}
+
 func TestDetectorDetectFSReportsConflictingLockfiles(t *testing.T) {
 	detector := newEmbeddedDetector(t)
 	project := fstest.MapFS{

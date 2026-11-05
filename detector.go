@@ -1,6 +1,7 @@
 package managers
 
 import (
+	"errors"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -581,6 +582,9 @@ func (m *fileMatcher) matchFileContents(files []string, pattern string) (bool, e
 	for _, name := range files {
 		contents, err := fs.ReadFile(m.fsys, joinFSPath(m.dir, name))
 		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
 			return false, err
 		}
 		if re.Match(contents) {
@@ -614,6 +618,9 @@ func (m *fileMatcher) matchPatterns(patterns []string) ([]string, error) {
 		for _, name := range found {
 			info, err := fs.Stat(m.fsys, name)
 			if err != nil {
+				if errors.Is(err, fs.ErrNotExist) {
+					continue
+				}
 				return nil, err
 			}
 			if !info.IsDir() {
