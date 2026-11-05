@@ -12,6 +12,8 @@ detection:
     - npm-shrinkwrap.json
   manifests:
     - package.json
+  default: true
+  ecosystem_order: 10
   priority: 10
 
 version_detection:

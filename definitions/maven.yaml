@@ -7,6 +7,8 @@ detection:
   lockfiles: []
   manifests:
     - pom.xml
+  default: true
+  ecosystem_order: 100
   priority: 10
 
 version_detection:

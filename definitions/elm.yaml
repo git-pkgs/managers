@@ -1,0 +1,14 @@
+name: elm
+ecosystem: elm
+binary: elm
+status: detection-only
+
+detection:
+  manifests:
+    - elm.json
+  default: true
+  ecosystem_order: 230
+  priority: 10
+
+commands: {}
+capabilities: []

@@ -17,6 +17,7 @@ detection:
     # Yarn berry uses .yarnrc.yml, classic uses .yarnrc
     - file: .yarnrc.yml
       exists: false
+  ecosystem_order: 10
   priority: 15  # higher than npm when yarn.lock present
 
 version_detection:

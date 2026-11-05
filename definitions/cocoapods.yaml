@@ -14,6 +14,8 @@ detection:
     - Podfile.lock
   manifests:
     - Podfile
+  default: true
+  ecosystem_order: 90
   priority: 10
 
 commands:

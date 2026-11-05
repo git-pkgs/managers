@@ -9,7 +9,9 @@ detection:
   manifests:
     - "*.cabal"
     - cabal.project
-  priority: 10
+  default: true
+  ecosystem_order: 140
+  priority: 20
 
 version_detection:
   command: [--version]

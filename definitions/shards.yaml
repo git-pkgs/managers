@@ -8,6 +8,8 @@ detection:
     - shard.lock
   manifests:
     - shard.yml
+  default: true
+  ecosystem_order: 150
   priority: 10
 
 version_detection:

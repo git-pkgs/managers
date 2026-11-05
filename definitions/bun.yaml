@@ -15,6 +15,7 @@ detection:
     - bun.lockb
   manifests:
     - package.json
+  ecosystem_order: 10
   priority: 25  # Higher than npm/yarn/pnpm when bun lockfile present
 
 commands:

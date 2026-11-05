@@ -9,6 +9,8 @@ detection:
   manifests:
     - deno.json
     - deno.jsonc
+  default: true
+  ecosystem_order: 130
   priority: 10
 
 version_detection:

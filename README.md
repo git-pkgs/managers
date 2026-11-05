@@ -51,10 +51,10 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | yarn | npm | yarn.lock |
 | bun | npm | bun.lock |
 | deno | deno | deno.lock |
-| bundler | gem | Gemfile.lock |
-| gem | gem | - |
+| bundler | rubygems | Gemfile.lock |
+| gem | rubygems | - |
 | cargo | cargo | Cargo.lock |
-| gomod | go | go.sum |
+| gomod | go | - |
 | pip | pypi | requirements.txt |
 | uv | pypi | uv.lock |
 | poetry | pypi | poetry.lock |
@@ -65,7 +65,7 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | pub | pub | pubspec.lock |
 | cocoapods | cocoapods | Podfile.lock |
 | swift | swift | Package.resolved |
-| nuget | nuget | packages.lock.json |
+| nuget | nuget | packages.lock.json, project.assets.json |
 | maven | maven | - |
 | gradle | maven | gradle.lockfile |
 | sbt | maven | - |
@@ -77,13 +77,15 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | shards | shards | shard.lock |
 | cpanm | cpan | cpanfile.snapshot |
 | lein | clojars | - |
-| vcpkg | vcpkg | vcpkg.json |
+| vcpkg | vcpkg | - |
 | conan | conan | conan.lock |
 | renv | cran | renv.lock |
 | helm | helm | Chart.lock |
 | brew | homebrew | - |
 
 Most managers support: install, add, remove, list, outdated, update, resolve. Some also support init, vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
+
+Detection-only definitions are available for Julia Pkg, Carthage, Elm, Dub, Haxelib and Nix. These definitions identify project files but do not define commands.
 
 ## Installation
 
@@ -131,6 +133,32 @@ func main() {
     fmt.Println(cmd) // ["npm", "install", "lodash@4.17.21", "--save-dev"]
 }
 ```
+
+### Detecting managers from files
+
+`DetectFS` and `DetectAllFS` accept any `fs.FS`, including an on-disk directory, a Git tree or an in-memory test filesystem. Detection does not execute package manager commands.
+
+```go
+detector := managers.NewDetector(translator, runner)
+for _, def := range defs {
+    detector.Register(def)
+}
+
+detections, err := detector.DetectAllFS(repoFS, ".", managers.FileDetectOptions{
+    OnConflict: managers.ConflictUseFirst,
+})
+```
+
+`GitPkgsFileDetectionPolicy` preserves the filenames, manager priority and result order used by the git-pkgs CLI. Leave `Policy` unset to detect every registered definition.
+
+```go
+detections, err := detector.DetectAllFS(repoFS, ".", managers.FileDetectOptions{
+    OnConflict: managers.ConflictUseFirst,
+    Policy:     managers.GitPkgsFileDetectionPolicy(),
+})
+```
+
+History scanners can call `AffectedDirectories` for a changed path, then rerun detection only in the returned project directories.
 
 ### Command chaining
 

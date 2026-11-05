@@ -14,7 +14,9 @@ detection:
   file_checks:
     - file: pyproject.toml
       match: '\[tool\.uv\]'
-  priority: 20  # higher than pip/poetry when uv.lock present
+  default: true
+  ecosystem_order: 50
+  priority: 30  # higher than pip/poetry when uv.lock present
 
 version_detection:
   command: [--version]

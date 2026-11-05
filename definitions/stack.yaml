@@ -9,6 +9,7 @@ detection:
   manifests:
     - stack.yaml
     - package.yaml
+  ecosystem_order: 140
   priority: 15
 
 version_detection:

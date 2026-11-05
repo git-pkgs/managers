@@ -1,0 +1,16 @@
+name: pkg
+ecosystem: julia
+binary: julia
+status: detection-only
+
+detection:
+  lockfiles:
+    - Manifest.toml
+  manifests:
+    - Project.toml
+  default: true
+  ecosystem_order: 160
+  priority: 10
+
+commands: {}
+capabilities: []

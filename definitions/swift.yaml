@@ -8,6 +8,8 @@ detection:
     - Package.resolved
   manifests:
     - Package.swift
+  default: true
+  ecosystem_order: 120
   priority: 10
 
 version_detection:

@@ -1,0 +1,16 @@
+name: nix
+ecosystem: nix
+binary: nix
+status: detection-only
+
+detection:
+  lockfiles:
+    - flake.lock
+  manifests:
+    - flake.nix
+  default: true
+  ecosystem_order: 260
+  priority: 10
+
+commands: {}
+capabilities: []

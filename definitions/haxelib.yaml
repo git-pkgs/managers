@@ -1,0 +1,14 @@
+name: haxelib
+ecosystem: haxelib
+binary: haxelib
+status: detection-only
+
+detection:
+  manifests:
+    - haxelib.json
+  default: true
+  ecosystem_order: 250
+  priority: 10
+
+commands: {}
+capabilities: []

@@ -1,0 +1,17 @@
+name: carthage
+ecosystem: carthage
+binary: carthage
+status: detection-only
+
+detection:
+  lockfiles:
+    - Cartfile.resolved
+  manifests:
+    - Cartfile
+    - Cartfile.private
+  default: true
+  ecosystem_order: 190
+  priority: 10
+
+commands: {}
+capabilities: []

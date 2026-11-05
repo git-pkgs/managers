@@ -17,7 +17,8 @@ detection:
   file_checks:
     - file: pyproject.toml
       match: '\[tool\.poetry\]'
-  priority: 20  # Higher than uv for poetry-specific projects
+  ecosystem_order: 50
+  priority: 20
 
 commands:
   init:

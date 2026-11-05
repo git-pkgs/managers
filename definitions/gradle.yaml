@@ -9,6 +9,7 @@ detection:
   manifests:
     - build.gradle
     - build.gradle.kts
+  ecosystem_order: 100
   priority: 10
 
 version_detection:

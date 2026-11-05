@@ -23,6 +23,7 @@ type DetectOptions struct {
 type FileDetectOptions struct {
 	OnConflict ConflictBehavior
 	Manager    string
+	Policy     *FileDetectionPolicy
 }
 
 // FileDetection describes the files that identify a package manager.
@@ -90,6 +91,16 @@ func (d *Detector) Detect(dir string, opts DetectOptions) (Manager, error) { //n
 // DetectFS detects a package manager from files in dir. It does not look for or
 // execute the package manager CLI.
 func (d *Detector) DetectFS(fsys fs.FS, dir string, opts FileDetectOptions) (FileDetection, error) {
+	if opts.Policy != nil {
+		detections, err := d.detectAllPolicyFS(fsys, dir, opts)
+		if err != nil {
+			return FileDetection{}, err
+		}
+		if len(detections) == 0 {
+			return FileDetection{}, ErrNoManifest{Dir: dir}
+		}
+		return detections[0], nil
+	}
 	match, _, err := d.detectFS(fsys, dir, dir, opts)
 	return match, err
 }
@@ -97,6 +108,10 @@ func (d *Detector) DetectFS(fsys fs.FS, dir string, opts FileDetectOptions) (Fil
 // DetectAllFS detects one package manager per ecosystem from files in dir. It
 // does not look for or execute package manager CLIs.
 func (d *Detector) DetectAllFS(fsys fs.FS, dir string, opts FileDetectOptions) ([]FileDetection, error) {
+	if opts.Policy != nil {
+		return d.detectAllPolicyFS(fsys, dir, opts)
+	}
+
 	matcher, err := newFileMatcher(fsys, dir)
 	if err != nil {
 		return nil, err
@@ -133,9 +148,171 @@ func (d *Detector) DetectAllFS(fsys fs.FS, dir string, opts FileDetectOptions) (
 	}
 
 	sort.Slice(detections, func(i, j int) bool {
+		left, leftConfigured := d.ecosystemOrder(detections[i].Ecosystem)
+		right, rightConfigured := d.ecosystemOrder(detections[j].Ecosystem)
+		if leftConfigured != rightConfigured {
+			return leftConfigured
+		}
+		if leftConfigured && left != right {
+			return left < right
+		}
 		return detections[i].Ecosystem < detections[j].Ecosystem
 	})
 	return detections, nil
+}
+
+func (d *Detector) detectAllPolicyFS(
+	fsys fs.FS,
+	dir string,
+	opts FileDetectOptions,
+) ([]FileDetection, error) {
+	matcher, err := newFileMatcher(fsys, dir)
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Manager != "" {
+		match, _, err := d.detectExplicitFS(matcher, dir, opts.Manager)
+		if err != nil {
+			return nil, err
+		}
+		return []FileDetection{match}, nil
+	}
+
+	var detections []FileDetection
+	for _, ecosystem := range opts.Policy.Ecosystems {
+		manifests, err := matcher.matchPatterns(ecosystem.Manifests)
+		if err != nil {
+			return nil, err
+		}
+
+		type lockfileMatch struct {
+			manager  string
+			lockfile string
+		}
+
+		var lockfiles []lockfileMatch
+		for _, rule := range ecosystem.Lockfiles {
+			matches, err := matcher.matchPatterns([]string{rule.File})
+			if err != nil {
+				return nil, err
+			}
+			for _, name := range matches {
+				lockfiles = append(lockfiles, lockfileMatch{manager: rule.Manager, lockfile: name})
+			}
+		}
+
+		if len(lockfiles) > 1 && opts.OnConflict == ConflictError {
+			names := make([]string, 0, len(lockfiles))
+			for _, match := range lockfiles {
+				names = append(names, match.lockfile)
+			}
+			return nil, ErrConflictingLockfiles{Dir: dir, Lockfiles: names}
+		}
+		if len(lockfiles) > 0 {
+			detections = append(detections, FileDetection{
+				Manager:   lockfiles[0].manager,
+				Ecosystem: ecosystem.Ecosystem,
+				Directory: dir,
+				Manifest:  first(manifests),
+				Lockfile:  lockfiles[0].lockfile,
+			})
+			continue
+		}
+
+		if len(manifests) > 0 {
+			detections = append(detections, FileDetection{
+				Manager:   ecosystem.DefaultManager,
+				Ecosystem: ecosystem.Ecosystem,
+				Directory: dir,
+				Manifest:  manifests[0],
+			})
+		}
+	}
+
+	return detections, nil
+}
+
+// Ecosystem returns the ecosystem registered for managerName.
+func (d *Detector) Ecosystem(managerName string) (string, bool) {
+	for _, def := range d.definitions {
+		if def.Name == managerName {
+			return def.Ecosystem, true
+		}
+	}
+	return "", false
+}
+
+func (d *Detector) ecosystemOrder(ecosystem string) (int, bool) {
+	order := 0
+	configured := false
+	for _, def := range d.definitions {
+		if def.Ecosystem != ecosystem || def.Detection.EcosystemOrder <= 0 {
+			continue
+		}
+		if !configured || def.Detection.EcosystemOrder < order {
+			order = def.Detection.EcosystemOrder
+			configured = true
+		}
+	}
+	return order, configured
+}
+
+// AffectedDirectories returns project directories whose detection result may
+// change when filePath changes.
+func (d *Detector) AffectedDirectories(filePath string) ([]string, error) {
+	directories := make(map[string]bool)
+	for _, def := range d.definitions {
+		patterns := append([]string(nil), def.Detection.Manifests...)
+		patterns = append(patterns, def.Detection.Lockfiles...)
+		for _, check := range def.Detection.FileChecks {
+			patterns = append(patterns, check.File)
+		}
+		for _, pattern := range patterns {
+			directory, matched, err := affectedDirectory(filePath, pattern)
+			if err != nil {
+				return nil, err
+			}
+			if matched {
+				directories[directory] = true
+			}
+		}
+	}
+
+	result := make([]string, 0, len(directories))
+	for directory := range directories {
+		result = append(result, directory)
+	}
+	if len(result) == 0 {
+		return nil, nil
+	}
+	sort.Strings(result)
+	return result, nil
+}
+
+func affectedDirectory(filePath, pattern string) (string, bool, error) {
+	filePath = path.Clean(filePath)
+	for offset := 0; offset < len(filePath); {
+		suffix := filePath[offset:]
+		matched, err := path.Match(pattern, suffix)
+		if err != nil {
+			return "", false, err
+		}
+		if matched {
+			directory := strings.TrimSuffix(filePath[:offset], "/")
+			if directory == "" {
+				directory = "."
+			}
+			return directory, true, nil
+		}
+
+		next := strings.IndexByte(suffix, '/')
+		if next < 0 {
+			break
+		}
+		offset += next + 1
+	}
+	return "", false, nil
 }
 
 type matchedDefinition struct {
@@ -198,13 +375,13 @@ func (d *Detector) detectFS(
 		return newFileDetection(match.def, reportedDir, match.manifest, match.lockfile), match.def, nil
 	}
 
-	for i := len(matchedDefinitions) - 1; i >= 0; i-- {
-		matched := matchedDefinitions[i]
-		def := matched.def
-		matches := matched.matches
-		if matches.valid && len(matches.manifests) > 0 {
-			return newFileDetection(def, reportedDir, matches.manifests[0], ""), def, nil
-		}
+	if matched, ok := selectManifestDefinition(matchedDefinitions); ok {
+		return newFileDetection(
+			matched.def,
+			reportedDir,
+			matched.matches.manifests[0],
+			"",
+		), matched.def, nil
 	}
 
 	return FileDetection{}, nil, ErrNoManifest{Dir: reportedDir}
@@ -217,7 +394,7 @@ func (d *Detector) matchDefinitions(matcher *fileMatcher) ([]matchedDefinition, 
 		if err != nil {
 			return nil, err
 		}
-		if matches.valid {
+		if len(matches.manifests) > 0 || len(matches.lockfiles) > 0 {
 			matched = append(matched, matchedDefinition{def: def, matches: matches})
 		}
 	}
@@ -258,14 +435,43 @@ func selectEcosystemDetection(
 		), nil
 	}
 
-	for i := len(matches) - 1; i >= 0; i-- {
-		match := matches[i]
-		if len(match.matches.manifests) > 0 {
-			return newFileDetection(match.def, dir, match.matches.manifests[0], ""), nil
-		}
+	if match, ok := selectManifestDefinition(matches); ok {
+		return newFileDetection(match.def, dir, match.matches.manifests[0], ""), nil
 	}
 
 	return FileDetection{}, ErrNoManifest{Dir: dir}
+}
+
+func selectManifestDefinition(matches []matchedDefinition) (matchedDefinition, bool) {
+	for _, match := range matches {
+		if match.matches.checksMatch && hasPositiveFileCheck(match.def) && len(match.matches.manifests) > 0 {
+			return match, true
+		}
+	}
+
+	for _, match := range matches {
+		if match.def.Detection.Default && len(match.matches.manifests) > 0 {
+			return match, true
+		}
+	}
+
+	for i := len(matches) - 1; i >= 0; i-- {
+		match := matches[i]
+		if match.matches.checksMatch && len(match.matches.manifests) > 0 {
+			return match, true
+		}
+	}
+
+	return matchedDefinition{}, false
+}
+
+func hasPositiveFileCheck(def *definitions.Definition) bool {
+	for _, check := range def.Detection.FileChecks {
+		if check.Match != "" || check.Exists {
+			return true
+		}
+	}
+	return false
 }
 
 func (d *Detector) detectExplicitFS(
@@ -294,9 +500,9 @@ func (d *Detector) detectExplicitFS(
 }
 
 type definitionMatch struct {
-	valid     bool
-	manifests []string
-	lockfiles []string
+	checksMatch bool
+	manifests   []string
+	lockfiles   []string
 }
 
 type fileMatcher struct {
@@ -322,9 +528,9 @@ func newFileMatcher(fsys fs.FS, dir string) (*fileMatcher, error) {
 }
 
 func (m *fileMatcher) matchDefinition(def *definitions.Definition) (definitionMatch, error) {
-	valid, err := m.matchFileChecks(def.Detection.FileChecks)
-	if err != nil || !valid {
-		return definitionMatch{valid: valid}, err
+	checksMatch, err := m.matchFileChecks(def.Detection.FileChecks)
+	if err != nil {
+		return definitionMatch{}, err
 	}
 
 	manifests, err := m.matchPatterns(def.Detection.Manifests)
@@ -337,9 +543,9 @@ func (m *fileMatcher) matchDefinition(def *definitions.Definition) (definitionMa
 	}
 
 	return definitionMatch{
-		valid:     true,
-		manifests: manifests,
-		lockfiles: lockfiles,
+		checksMatch: checksMatch,
+		manifests:   manifests,
+		lockfiles:   lockfiles,
 	}, nil
 }
 
