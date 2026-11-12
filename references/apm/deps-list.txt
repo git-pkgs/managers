@@ -1,0 +1,9 @@
+Usage: apm deps list [OPTIONS]
+
+  List installed APM dependencies and their primitives
+
+Options:
+  -g, --global  List user-scope dependencies (~/.apm/) instead of project
+  --all         Show both project and user-scope dependencies
+  --insecure    Show only installed dependencies locked to http:// sources
+  --help        Show this message and exit.

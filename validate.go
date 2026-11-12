@@ -11,6 +11,8 @@ var defaultValidators = map[string]*regexp.Regexp{
 	"cargo_crate":    regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_-]*$`),
 	"go_module":      regexp.MustCompile(`^[a-zA-Z0-9][\w\-\.\/]*$`),
 	"maven_artifact": regexp.MustCompile(`^[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+$`),
+	// APM accepts owner/repo, Git URLs, local paths and NAME@MARKETPLACE, so only reject flags.
+	"apm_package": regexp.MustCompile(`^[^-]`),
 }
 
 const (

@@ -1,0 +1,175 @@
+Usage: apm install [OPTIONS] [PACKAGES]...
+
+  Install APM, MCP, and LSP dependencies (supports APM packages, Claude skills
+  (SKILL.md), and plugin collections (plugin.json); auto-creates apm.yml; use
+  --allow-insecure for http:// packages)
+
+Options:
+  --runtime TEXT                  Target a specific runtime only. Values:
+                                  agent-skills, agents, agy, all, antigravity,
+                                  claude, codex, copilot, copilot-app,
+                                  copilot-cowork, cursor, gemini, grok-bot,
+                                  grok-build, grok-cloud, hermes, intellij,
+                                  kiro, openclaw, opencode, vscode, windsurf.
+                                  (legacy alias for --target, single value
+                                  only; prefer --target)
+  --exclude TEXT                  Exclude one runtime from the resolved
+                                  MCP/LSP target set
+  --only [apm|mcp]                Install only APM packages or MCP/LSP service
+                                  dependencies
+  --update                        Update dependencies to latest Git references
+                                  (deprecated: prefer 'apm update' for an
+                                  interactive plan, or 'apm update --yes' for
+                                  CI). Unlike --refresh, --update restructures
+                                  the entire dependency graph.
+  --dry-run                       Show what would change without writing files
+  --force                         Overwrite locally-authored files on
+                                  collision and deploy despite critical
+                                  security findings (does NOT refresh refs;
+                                  use 'apm update' for that)
+  --frozen                        Refuse to install when apm.lock.yaml is
+                                  missing or out of sync with apm.yml,
+                                  including Git source, ref, host provider,
+                                  transport, and MCP config state (CI-safe;
+                                  mutually exclusive with --update, --mcp, and
+                                  positional packages). Use 'apm audit' for
+                                  on-disk integrity.
+  -v, --verbose                   Show detailed installation information
+  --trust-transitive-mcp          Trust self-defined MCP servers from
+                                  transitive packages (skip re-declaration
+                                  requirement)
+  --parallel-downloads INTEGER    Max concurrent package downloads (0 to
+                                  disable parallelism)  [default: 4]
+  --dev                           Install as development dependency
+                                  (devDependencies)
+  -t, --target TARGET             Target harness(es) to deploy to. Use commas
+                                  for multiple targets; repeating the flag
+                                  keeps only the last value (use commas
+                                  instead). Values: agent-skills, agents, agy,
+                                  all, antigravity, claude, codex, copilot,
+                                  copilot-app, copilot-cowork, cursor, gemini,
+                                  grok-bot, grok-build, grok-cloud, hermes,
+                                  intellij, kiro, openclaw, opencode, vscode,
+                                  windsurf. IntelliJ-specific integration is
+                                  MCP-only; file primitives use the Copilot
+                                  profile. 'all' excludes agent-skills,
+                                  antigravity, grok-bot, hermes, experimental
+                                  targets, and intellij. Combine explicit-only
+                                  targets when needed. Experimental targets
+                                  require their feature flags. Target
+                                  resolution: --runtime/--target > apm.yml
+                                  targets: > apm config set target ... > auto-
+                                  detect (only when no higher-priority
+                                  selection exists). With nothing to detect,
+                                  install exits 2 with a teaching message. For
+                                  'apm compile', use '--all'; '--target all'
+                                  is deprecated.
+  --allow-insecure                Allow HTTP (insecure) dependencies. Required
+                                  when dependencies use http:// URLs.
+  --allow-insecure-host HOSTNAME  Allow transitive HTTP (insecure)
+                                  dependencies from this hostname. Repeat for
+                                  multiple hosts.
+  -g, --global                    Install to user scope (~/.apm/) instead of
+                                  the current project. Direct MCP installs
+                                  create or update ~/.apm/apm.yml. Mixed
+                                  selections warn and skip workspace-only
+                                  runtimes; selections with no global-capable
+                                  runtime exit 2 before changing the user
+                                  manifest, lockfile, or runtime
+                                  configuration. Supported runtimes include
+                                  Copilot CLI, Claude Code, Cursor, OpenCode,
+                                  Codex CLI, Gemini CLI, Antigravity CLI,
+                                  Hermes, Kiro, Windsurf, and JetBrains
+                                  Copilot.
+  --ssh                           Prefer SSH transport for shorthand
+                                  (owner/repo) dependencies. Mutually
+                                  exclusive with --https.
+  --https                         Prefer HTTPS transport for shorthand
+                                  (owner/repo) dependencies. Mutually
+                                  exclusive with --ssh.
+  --allow-protocol-fallback       Restore the legacy permissive cross-protocol
+                                  fallback chain (escape hatch for migrating
+                                  users; also: APM_ALLOW_PROTOCOL_FALLBACK=1).
+                                  Caveat: fallback reuses the same port across
+                                  schemes; on servers that use different SSH
+                                  and HTTPS ports, omit this flag and pin the
+                                  dependency with an explicit ssh:// or
+                                  https:// URL.
+  --mcp NAME                      Add an MCP server entry to apm.yml. Use with
+                                  --transport, --url, --env, --header, --mcp-
+                                  version, or a stdio command after `--`.
+                                  Resolves active targets as
+                                  --runtime/--target > apm.yml targets: > apm
+                                  config set target ... > auto-detect (only
+                                  when no higher-priority selection exists);
+                                  writes only for active targets.
+  --transport [stdio|http|sse|streamable-http]
+                                  MCP transport (stdio, http, sse, streamable-
+                                  http). Inferred from --url or post-- command
+                                  when omitted (requires --mcp).
+  --url TEXT                      MCP server URL for http/sse/streamable-http
+                                  transports (requires --mcp).
+  --env KEY=VALUE                 Environment variable for stdio MCP,
+                                  repeatable (requires --mcp).
+  --header KEY=VALUE              HTTP header for remote MCP, repeatable
+                                  (requires --mcp and --url).
+  --mcp-version TEXT              Pin MCP registry entry to a specific version
+                                  (requires --mcp).
+  --registry URL                  MCP registry URL (http:// or https://) for
+                                  resolving --mcp NAME. Precedence: this flag,
+                                  MCP_REGISTRY_URL, apm config, then the
+                                  public default. Captured in apm.yml on the
+                                  entry's 'registry:' field for auditability.
+                                  Not valid with --url or a stdio command
+                                  (self-defined entries).
+  --skill NAME                    Install only named skill(s) from a
+                                  SKILL_BUNDLE. Repeatable. Persisted in
+                                  apm.yml and apm.lock so bare 'apm install'
+                                  is deterministic. Additive across installs:
+                                  a later --skill X adds X to the existing pin
+                                  (union) rather than replacing it. Use
+                                  --skill '*' (quote the asterisk in your
+                                  shell) to reset to all skills; to drop a
+                                  single skill, edit the skills: list in
+                                  apm.yml then re-run apm install.
+  --no-policy                     Skip org policy enforcement for this
+                                  invocation. Does NOT bypass apm audit --ci.
+  --audit [off|warn|block]        Run 'apm audit' over deployed files during
+                                  install: off, warn, or block. Overrides
+                                  config/policy. Requires 'apm experimental
+                                  enable external-scanners'. An org policy
+                                  'block' cannot be relaxed below by this
+                                  flag.
+  --no-audit                      Disable the install-time audit for this
+                                  invocation (equivalent to --audit off).
+  --refresh                       Re-fetch all dependencies from upstream and
+                                  re-resolve all ref pins. Use 'apm update'
+                                  for interactive upgrade planning.
+  --legacy-skill-paths            Deploy skill files to per-client paths (e.g.
+                                  .cursor/skills/) instead of the shared
+                                  .agents/skills/ directory. Compatibility
+                                  flag for projects that need per-client skill
+                                  layouts.
+  --as ALIAS                      Override the log/display label when
+                                  installing a local bundle (directory, .zip,
+                                  or .tar.gz produced by 'apm pack'). Only
+                                  valid for local-bundle installs; passing
+                                  --as without a local bundle path is
+                                  rejected.
+  --trust-bin / --no-trust-bin    Allow or skip bin/ executable deployment for
+                                  this invocation. --trust-bin deploys bin/
+                                  executables (suppresses the trust warning).
+                                  --no-trust-bin skips bin/ deployment even
+                                  when policy allows it. Default: deploys bin/
+                                  but emits a warning; non-interactive
+                                  contexts skip bin/ by default. Use 'apm
+                                  approve' for persistent per-package trust.
+  --root DIR                      Install into DIR instead of $PWD:
+                                  apm_modules/, apm.lock.yaml, .claude/,
+                                  .codex/, .agents/, .opencode/ are written
+                                  under DIR while sources (apm.yml, .apm/,
+                                  local-path packages) continue resolving from
+                                  $PWD. Mirrors 'pip install --target' / 'npm
+                                  install --prefix'. Project scope only; not
+                                  valid with --global.
+  --help                          Show this message and exit.

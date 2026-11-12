@@ -1,0 +1,29 @@
+Usage: apm update [OPTIONS] [PACKAGES]...
+
+  Refresh APM dependencies to the latest matching refs
+
+Options:
+  -y, --yes                     Skip the confirmation prompt (for CI /
+                                automation)
+  --dry-run                     Render the update plan and exit without
+                                changing anything
+  -v, --verbose                 Show unchanged deps and detailed pipeline
+                                diagnostics
+  -g, --global                  Refresh user-scope dependencies (~/.apm/)
+                                instead of the current project
+  --force                       Overwrite locally-authored files and deploy
+                                despite critical security findings; does not
+                                bypass upstream ref resolution
+  --parallel-downloads INTEGER  Max concurrent package downloads (0 to disable
+                                parallelism)  [default: 4]
+  -t, --target TARGET           Agent target(s) to update for. Values: agent-
+                                skills, agents, agy, all, antigravity, claude,
+                                codex, copilot, copilot-app, copilot-cowork,
+                                cursor, gemini, grok-bot, grok-build, grok-
+                                cloud, hermes, intellij, kiro, openclaw,
+                                opencode, vscode, windsurf. Comma-separated
+                                for multiple: --target claude,cursor. Highest-
+                                priority entry in the resolution chain
+                                (--target > apm.yml targets: > apm config set
+                                target ... > auto-detect).
+  --help                        Show this message and exit.
