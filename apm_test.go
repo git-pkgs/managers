@@ -52,6 +52,33 @@ func TestAPMAddRequiresPackage(t *testing.T) {
 	}
 }
 
+func TestValidateAPMPackage(t *testing.T) {
+	for _, name := range []string{"owner/repo", "gitlab.com/group/sub/repo", "git@github.com:owner/repo.git", "../local", "plugin@marketplace"} {
+		if err := ValidatePackageName("apm_package", name); err != nil {
+			t.Errorf("%q rejected: %v", name, err)
+		}
+	}
+	for _, name := range []string{"", "-", "--force", "-g"} {
+		if err := ValidatePackageName("apm_package", name); err == nil {
+			t.Errorf("%q accepted", name)
+		}
+	}
+}
+
+func TestAPMRejectsFlagPackages(t *testing.T) {
+	tr := loadTranslator(t)
+	for _, op := range []string{"add", "remove", "update"} {
+		if _, err := tr.BuildCommand("apm", op, CommandInput{Args: map[string]string{"package": "--force"}}); err == nil {
+			t.Errorf("%s accepted a flag as the package", op)
+		}
+	}
+	for _, pkg := range []string{"owner/repo", "https://github.com/owner/repo.git", "./skills/local", "plugin@marketplace"} {
+		if _, err := tr.BuildCommand("apm", "add", CommandInput{Args: map[string]string{"package": pkg}}); err != nil {
+			t.Errorf("add rejected %q: %v", pkg, err)
+		}
+	}
+}
+
 func TestAPMCapabilities(t *testing.T) {
 	defs, err := definitions.LoadEmbedded()
 	if err != nil {

@@ -263,17 +263,22 @@ func (p PackageBlocklistPolicy) Check(ctx context.Context, op *PolicyOperation) 
 }
 
 // match checks pkg against the blocklist, both as given and with any
-// trailing @version stripped so that a versioned add such as
-// `go get example.com/foo@v1.2.3` or `npm install @scope/name@1.0.0`
-// is caught by an entry keyed on the bare package name.
+// trailing #ref or @version stripped so that a versioned add such as
+// `go get example.com/foo@v1.2.3`, `npm install @scope/name@1.0.0` or
+// `apm install owner/repo#main` is caught by an entry keyed on the bare
+// package name.
 func (p PackageBlocklistPolicy) match(pkg string) *PolicyResult {
-	if reason, blocked := p.Blocked[pkg]; blocked {
-		return blockedResult(pkg, reason)
+	candidates := []string{pkg}
+	if i := strings.LastIndex(pkg, "#"); i > 0 {
+		pkg = pkg[:i]
+		candidates = append(candidates, pkg)
 	}
 	if i := strings.LastIndex(pkg, "@"); i > 0 {
-		bare := pkg[:i]
-		if reason, blocked := p.Blocked[bare]; blocked {
-			return blockedResult(bare, reason)
+		candidates = append(candidates, pkg[:i])
+	}
+	for _, name := range candidates {
+		if reason, blocked := p.Blocked[name]; blocked {
+			return blockedResult(name, reason)
 		}
 	}
 	return nil

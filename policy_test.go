@@ -175,6 +175,7 @@ func TestPackageBlocklistScopedAndVersioned(t *testing.T) {
 		Blocked: map[string]string{
 			"@scope/name":        "scoped bare",
 			"github.com/org/mod": "go module",
+			"owner/repo":         "apm package",
 		},
 	}
 	cases := []struct {
@@ -187,6 +188,9 @@ func TestPackageBlocklistScopedAndVersioned(t *testing.T) {
 		{"github.com/org/mod@v1.2.3", false},
 		{"github.com/org/mod", false},
 		{"github.com/org/other@v1.0.0", true},
+		{"owner/repo#main", false},
+		{"owner/repo#v1.2.0", false},
+		{"owner/other#main", true},
 	}
 	for _, tc := range cases {
 		res, _ := policy.Check(context.Background(), &PolicyOperation{Packages: []string{tc.pkg}})

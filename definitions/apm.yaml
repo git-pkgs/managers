@@ -48,7 +48,7 @@ commands:
   add:
     base: [install]
     args:
-      package: {position: 0, required: true}
+      package: {position: 0, required: true, validate: apm_package}
       version: {position: 0, suffix: "#", required: false}
     flags:
       dev: [--dev]
@@ -59,7 +59,7 @@ commands:
   remove:
     base: [uninstall]
     args:
-      package: {position: 0, required: true}
+      package: {position: 0, required: true, validate: apm_package}
     exit_codes:
       0: success
       1: error
@@ -81,7 +81,7 @@ commands:
   update:
     base: [update]
     args:
-      package: {position: 0, required: false}
+      package: {position: 0, required: false, validate: apm_package}
     default_flags: [--yes]
     exit_codes:
       0: success
