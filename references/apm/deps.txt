@@ -1,0 +1,14 @@
+Usage: apm deps [OPTIONS] COMMAND [ARGS]...
+
+  Manage APM package dependencies
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  clean   Remove all APM dependencies
+  info    Show detailed package information (alias for 'apm view PACKAGE'...
+  list    List installed APM dependencies and their primitives
+  tree    Show the full dependency tree
+  update  DEPRECATED: use 'apm update' instead (strict superset).
+  why     Explain why a package is installed by walking the lockfile back...

@@ -1,0 +1,11 @@
+Usage: apm outdated [OPTIONS]
+
+  Show outdated locked dependencies
+
+Options:
+  -g, --global                   Check user-scope dependencies (~/.apm/)
+  -v, --verbose                  Show additional info (e.g., available tags
+                                 for outdated deps)
+  -j, --parallel-checks INTEGER  Max concurrent remote checks (default: 4, 0 =
+                                 sequential)
+  --help                         Show this message and exit.

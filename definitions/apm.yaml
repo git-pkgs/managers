@@ -1,0 +1,106 @@
+# APM - Microsoft Agent Package Manager
+# https://github.com/microsoft/apm
+#
+# APM uses apm.yml for manifests and apm.lock.yaml for lockfiles (apm.lock
+# before that). Packages are Git repositories (owner/repo) with an optional
+# #ref. The top-level "list" command lists scripts, so dependencies are
+# listed with "deps list". No dependency command has JSON output.
+
+name: apm
+ecosystem: apm
+binary: apm
+version: ">=0.35.1"
+status: current
+min_tested: "0.35.1"
+max_tested: "0.35.1"
+
+detection:
+  lockfiles:
+    - apm.lock.yaml
+    - apm.lock
+  manifests:
+    - apm.yml
+  default: true
+  ecosystem_order: 280
+  priority: 10
+
+version_detection:
+  command: [--version]
+  pattern: 'version (\d+\.\d+\.\d+)'
+
+commands:
+  init:
+    base: [init]
+    default_flags: [--yes]
+    exit_codes:
+      0: success
+      1: error
+
+  install:
+    base: [install]
+    flags:
+      frozen: [--frozen]
+    exit_codes:
+      0: success
+      1: error
+
+  # apm install owner/repo#ref adds the package to apm.yml
+  add:
+    base: [install]
+    args:
+      package: {position: 0, required: true}
+      version: {position: 0, suffix: "#", required: false}
+    flags:
+      dev: [--dev]
+    exit_codes:
+      0: success
+      1: error
+
+  remove:
+    base: [uninstall]
+    args:
+      package: {position: 0, required: true}
+    exit_codes:
+      0: success
+      1: error
+
+  list:
+    base: [deps, list]
+    exit_codes:
+      0: success
+      1: error
+
+  # exits 0 whether or not anything is outdated
+  outdated:
+    base: [outdated]
+    exit_codes:
+      0: success
+      1: error
+
+  # --yes skips the confirmation prompt, which fails without a TTY
+  update:
+    base: [update]
+    args:
+      package: {position: 0, required: false}
+    default_flags: [--yes]
+    exit_codes:
+      0: success
+      1: error
+
+  resolve:
+    base: [deps, tree]
+    exit_codes:
+      0: success
+      1: error
+
+capabilities:
+  - init
+  - install
+  - install_frozen
+  - add
+  - add_dev
+  - remove
+  - update
+  - list
+  - outdated
+  - resolve

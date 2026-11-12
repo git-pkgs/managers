@@ -1,0 +1,11 @@
+Usage: apm uninstall [OPTIONS] PACKAGES...
+
+  Remove packages using manifest entries or direct locked keys from 'apm deps
+  list'
+
+Options:
+  --dry-run      Preview removal plan (pre-uninstall scripts still run)
+  -v, --verbose  Show detailed removal information
+  -g, --global   Remove from user scope (~/.apm/) instead of the current
+                 project
+  --help         Show this message and exit.
