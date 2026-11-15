@@ -269,12 +269,14 @@ func (p PackageBlocklistPolicy) Check(ctx context.Context, op *PolicyOperation) 
 // package name.
 func (p PackageBlocklistPolicy) match(pkg string) *PolicyResult {
 	candidates := []string{pkg}
-	if i := strings.LastIndex(pkg, "#"); i > 0 {
-		pkg = pkg[:i]
-		candidates = append(candidates, pkg)
+	if bare, ok := stripSuffix(pkg, "@"); ok {
+		candidates = append(candidates, bare)
 	}
-	if i := strings.LastIndex(pkg, "@"); i > 0 {
-		candidates = append(candidates, pkg[:i])
+	if noRef, ok := stripSuffix(pkg, "#"); ok {
+		candidates = append(candidates, noRef)
+		if bare, ok := stripSuffix(noRef, "@"); ok {
+			candidates = append(candidates, bare)
+		}
 	}
 	for _, name := range candidates {
 		if reason, blocked := p.Blocked[name]; blocked {
@@ -282,6 +284,14 @@ func (p PackageBlocklistPolicy) match(pkg string) *PolicyResult {
 		}
 	}
 	return nil
+}
+
+// stripSuffix drops the last sep and what follows, ignoring a sep at index 0.
+func stripSuffix(pkg, sep string) (string, bool) {
+	if i := strings.LastIndex(pkg, sep); i > 0 {
+		return pkg[:i], true
+	}
+	return "", false
 }
 
 func blockedResult(pkg, reason string) *PolicyResult {
