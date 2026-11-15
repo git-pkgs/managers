@@ -1,0 +1,6 @@
+Usage: apm list [OPTIONS]
+
+  List available scripts in the current project
+
+Options:
+  --help  Show this message and exit.

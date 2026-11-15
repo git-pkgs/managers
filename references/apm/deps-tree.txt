@@ -1,0 +1,7 @@
+Usage: apm deps tree [OPTIONS]
+
+  Show the full dependency tree
+
+Options:
+  -g, --global  Show user-scope dependency tree (~/.apm/)
+  --help        Show this message and exit.

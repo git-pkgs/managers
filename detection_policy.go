@@ -1,6 +1,7 @@
 package managers
 
 const (
+	apmManagerName   = "apm"
 	npmManagerName   = "npm"
 	nugetManagerName = "nuget"
 )
@@ -93,6 +94,15 @@ func GitPkgsFileDetectionPolicy() *FileDetectionPolicy {
 		fileDetectionPolicy("haxelib", "haxelib", "haxelib.json", ""),
 		fileDetectionPolicy("nix", "nix", "flake.nix", "flake.lock"),
 		fileDetectionPolicy("conda", "conda", "environment.yml", ""),
+		{
+			Ecosystem:      apmManagerName,
+			DefaultManager: apmManagerName,
+			Manifests:      []string{"apm.yml"},
+			Lockfiles: []LockfileDetectionPolicy{
+				{File: "apm.lock.yaml", Manager: apmManagerName},
+				{File: "apm.lock", Manager: apmManagerName},
+			},
+		},
 	}}
 }
 

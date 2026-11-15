@@ -82,6 +82,7 @@ cmd, _ = translator.BuildCommand("bundler", "add", managers.CommandInput{
 | renv | cran | renv.lock |
 | helm | helm | Chart.lock |
 | brew | homebrew | - |
+| apm | apm | apm.lock.yaml, apm.lock |
 
 Most managers support: install, add, remove, list, outdated, update, resolve. Some also support init, vendor and path. Some managers (maven, gradle, sbt, lein) have limited CLI support for add/remove operations.
 
@@ -271,7 +272,7 @@ result, _ := manager.Init(ctx)
 
 Only managers that can scaffold in-place are supported. Managers whose `new` command always creates a child directory (mix, lein, helm, stack, pub, rebar3) or whose `init` command bootstraps global state rather than a project (opam) are excluded.
 
-**Managers with init support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, uv, poetry, deno, composer, swift, nuget, gradle, conan, conda, cabal, nimble, luarocks, shards, vcpkg, renv
+**Managers with init support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, uv, poetry, deno, composer, swift, nuget, gradle, conan, conda, cabal, nimble, luarocks, shards, vcpkg, renv, apm
 
 ### Getting package paths
 
@@ -309,7 +310,7 @@ result, _ := manager.Resolve(ctx)
 fmt.Println(result.Stdout) // raw CLI output (JSON tree, text tree, etc.)
 ```
 
-**Managers with resolve support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, pip, uv, poetry, conda, composer, maven, gradle, lein, swift, deno, stack, pub, mix, rebar3, nuget, conan, helm, renv
+**Managers with resolve support:** npm, pnpm, yarn, bun, bundler, cargo, gomod, pip, uv, poetry, conda, composer, maven, gradle, lein, swift, deno, stack, pub, mix, rebar3, nuget, conan, helm, renv, apm
 
 ### Replacing a dependency
 

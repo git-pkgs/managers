@@ -1,0 +1,21 @@
+Usage: apm init [OPTIONS] [PROJECT_NAME]
+
+  Initialize a new APM project
+
+Options:
+  --discover                 Inventory existing local packages without writes
+  --apply, --write           Add existing local package references to consumer
+                             apm.yml; never install.
+  --format [text|json|yaml]  Discovery report format  [default: text]
+  -g, --global               Discover under home and declare packages in
+                             ~/.apm/apm.yml
+  -y, --yes                  Skip interactive prompts and use auto-detected
+                             defaults
+  --plugin                   (deprecated) Use 'apm plugin init' instead.
+                             Scaffolds plugin.json + apm.yml.
+  --marketplace              (deprecated) Use 'apm marketplace init' instead.
+                             Seeds a marketplace block.
+  --target TARGET            Comma-separated target list (skip prompt, write
+                             directly)
+  -v, --verbose              Show detailed output
+  --help                     Show this message and exit.
